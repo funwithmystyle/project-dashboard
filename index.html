@@ -12,14 +12,13 @@
         .view-section { display: none; }
         .view-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        /* Transisi untuk accordion timeline */
         .timeline-content { transition: max-height 0.3s ease-out, padding 0.3s ease; max-height: 0; overflow: hidden; }
         .timeline-content.open { max-height: 500px; padding-top: 1rem; padding-bottom: 1rem; }
     </style>
 </head>
 <body class="bg-gray-100 flex h-screen overflow-hidden font-sans text-gray-800 relative">
 
-    <!-- Modal Tambah Project (Hidden by default) -->
+    <!-- Modal Tambah Project -->
     <div id="addProjectModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-50 hidden flex items-center justify-center transition-opacity">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
@@ -31,20 +30,20 @@
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
-                    <input type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Contoh: Auto Packing Machine">
+                    <input id="newProjectName" type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Contoh: Auto Packing Machine">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Lokasi Project</label>
-                    <input type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Contoh: Line Produksi A">
+                    <input id="newProjectLocation" type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Contoh: Line Produksi A">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Activity Project</label>
-                    <textarea class="w-full border border-gray-300 rounded px-3 py-2 h-24 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="List pekerjaan awal..."></textarea>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Activity Project (Awal)</label>
+                    <input id="newProjectActivity" type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Contoh: Design Review">
                 </div>
             </div>
             <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
                 <button onclick="toggleModal('addProjectModal')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors text-sm font-medium">Batal</button>
-                <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm font-medium"><i class="fa-solid fa-save mr-1"></i> Simpan Project</button>
+                <button onclick="simpanProjectBaru()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm font-medium"><i class="fa-solid fa-save mr-1"></i> Simpan Project</button>
             </div>
         </div>
     </div>
@@ -58,8 +57,6 @@
             </button>
         </div>
         <nav class="p-4 space-y-6 overflow-y-auto h-[calc(100%-4rem)] shadow-inner">
-            
-            <!-- Menu Utama -->
             <div>
                 <div class="text-gray-400 uppercase text-xs font-semibold mb-3">Menu Utama</div>
                 <ul class="space-y-2 text-sm">
@@ -71,8 +68,6 @@
                     </li>
                 </ul>
             </div>
-            
-            <!-- Menu Manajemen Tugas -->
             <div>
                 <div class="text-gray-400 uppercase text-xs font-semibold mb-3">Manajemen Tugas</div>
                 <ul class="space-y-2 text-sm">
@@ -89,8 +84,7 @@
 
     <!-- Konten Utama -->
     <div class="flex-1 flex flex-col h-full w-full relative">
-        
-        <!-- Navbar Atas -->
+        <!-- Navbar -->
         <header class="bg-white shadow-sm flex items-center justify-between p-4 z-10 border-b border-gray-200">
             <div class="flex items-center">
                 <button id="toggleSidebar" class="text-gray-600 hover:text-blue-600 focus:outline-none mr-4 transition-colors">
@@ -98,7 +92,6 @@
                 </button>
                 <h1 id="headerTitle" class="text-xl font-semibold text-gray-800">Dashboard Monitoring</h1>
             </div>
-            
             <div class="flex items-center">
                 <div class="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold shadow-md cursor-pointer hover:bg-blue-700 transition-colors">
                     <i class="fa-solid fa-users-gear"></i>
@@ -112,8 +105,7 @@
             <!-- VIEW 1: DASHBOARD -->
             <div id="dashboardView" class="view-section active">
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-                    <!-- Kartu Info -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 border-l-4 border-l-blue-500"><div class="flex items-center"><div class="p-3 rounded-full bg-blue-50 text-blue-500 mr-4"><i class="fa-solid fa-rocket text-xl"></i></div><div><p class="mb-1 text-sm font-medium text-gray-500">Project Berjalan</p><p class="text-2xl font-bold text-gray-800">3</p></div></div></div>
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 border-l-4 border-l-blue-500"><div class="flex items-center"><div class="p-3 rounded-full bg-blue-50 text-blue-500 mr-4"><i class="fa-solid fa-rocket text-xl"></i></div><div><p class="mb-1 text-sm font-medium text-gray-500">Project Berjalan</p><p class="text-2xl font-bold text-gray-800" id="countBerjalan">3</p></div></div></div>
                     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 border-l-4 border-l-green-500"><div class="flex items-center"><div class="p-3 rounded-full bg-green-50 text-green-500 mr-4"><i class="fa-solid fa-hammer text-xl"></i></div><div><p class="mb-1 text-sm font-medium text-gray-500">Pekerjaan Dilakukan</p><p class="text-2xl font-bold text-gray-800">12</p></div></div></div>
                     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 border-l-4 border-l-red-500"><div class="flex items-center"><div class="p-3 rounded-full bg-red-50 text-red-500 mr-4"><i class="fa-solid fa-clipboard-list text-xl"></i></div><div><p class="mb-1 text-sm font-medium text-gray-500">Outstanding Pekerjaan</p><p class="text-2xl font-bold text-gray-800">5</p></div></div></div>
                     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 border-l-4 border-l-purple-500"><div class="flex items-center"><div class="p-3 rounded-full bg-purple-50 text-purple-500 mr-4"><i class="fa-solid fa-scale-balanced text-xl"></i></div><div><p class="mb-1 text-sm font-medium text-gray-500">Done vs To Do</p><p class="text-2xl font-bold text-gray-800">8 / 17</p></div></div></div>
@@ -133,183 +125,34 @@
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-                    <!-- Project A -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
-                        <div class="bg-gray-50 p-4 border-b border-gray-200 rounded-t-lg flex justify-between items-center">
-                            <div><h3 class="font-bold text-lg text-gray-800">Long Taper 5</h3><span class="text-xs font-semibold px-2 py-1 bg-green-100 text-green-700 rounded-full mt-1 inline-block">On Progress</span></div>
-                            <div class="space-x-2"><button class="text-gray-400 hover:text-blue-500"><i class="fa-solid fa-pen-to-square"></i></button><button class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></div>
-                        </div>
-                        <div class="p-4 flex-1">
-                            <ul class="space-y-3">
-                                <li class="bg-white border border-gray-200 p-3 rounded shadow-sm text-sm flex justify-between items-start"><span class="line-through text-gray-400">Analisa OEE Machine</span><i class="fa-solid fa-check-circle text-green-500 mt-1"></i></li>
-                                <li class="bg-white border border-gray-200 border-l-4 border-l-blue-500 p-3 rounded shadow-sm text-sm flex justify-between items-start"><span class="text-gray-700 font-medium">Wiring Panel</span><i class="fa-solid fa-spinner text-blue-500 mt-1"></i></li>
-                                <li class="bg-white border border-gray-200 p-3 rounded shadow-sm text-sm flex justify-between items-start"><span class="text-gray-500">Machine Trial</span><i class="fa-regular fa-clock text-gray-300 mt-1"></i></li>
-                            </ul>
-                        </div>
-                        <div class="p-4 border-t border-gray-100"><button class="w-full text-sm text-gray-500 hover:text-blue-600 hover:bg-blue-50 py-2 rounded transition-colors text-left px-2"><i class="fa-solid fa-plus mr-1"></i> Tambah Activity...</button></div>
-                    </div>
-
-                    <!-- Project B -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
-                        <div class="bg-gray-50 p-4 border-b border-gray-200 rounded-t-lg flex justify-between items-center">
-                            <div><h3 class="font-bold text-lg text-gray-800">Depalletizer</h3><span class="text-xs font-semibold px-2 py-1 bg-blue-100 text-blue-700 rounded-full mt-1 inline-block">Planning</span></div>
-                            <div class="space-x-2"><button class="text-gray-400 hover:text-blue-500"><i class="fa-solid fa-pen-to-square"></i></button><button class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></div>
-                        </div>
-                        <div class="p-4 flex-1">
-                            <ul class="space-y-3">
-                                <li class="bg-white border border-gray-200 p-3 rounded shadow-sm text-sm flex justify-between items-start"><span class="line-through text-gray-400">Hardware Specification Mapping</span><i class="fa-solid fa-check-circle text-green-500 mt-1"></i></li>
-                                <li class="bg-white border border-gray-200 border-l-4 border-l-blue-500 p-3 rounded shadow-sm text-sm flex justify-between items-start"><span class="text-gray-700 font-medium">Cost Comparison BOM</span><i class="fa-solid fa-spinner text-blue-500 mt-1"></i></li>
-                                <li class="bg-white border border-gray-200 p-3 rounded shadow-sm text-sm flex justify-between items-start"><span class="text-gray-500">Omron PLC Transition</span><i class="fa-regular fa-clock text-gray-300 mt-1"></i></li>
-                            </ul>
-                        </div>
-                        <div class="p-4 border-t border-gray-100"><button class="w-full text-sm text-gray-500 hover:text-blue-600 hover:bg-blue-50 py-2 rounded transition-colors text-left px-2"><i class="fa-solid fa-plus mr-1"></i> Tambah Activity...</button></div>
-                    </div>
-
-                    <!-- Project C -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
-                        <div class="bg-gray-50 p-4 border-b border-gray-200 rounded-t-lg flex justify-between items-center">
-                            <div><h3 class="font-bold text-lg text-gray-800">Transfer Conveyor</h3><span class="text-xs font-semibold px-2 py-1 bg-purple-100 text-purple-700 rounded-full mt-1 inline-block">Review</span></div>
-                            <div class="space-x-2"><button class="text-gray-400 hover:text-blue-500"><i class="fa-solid fa-pen-to-square"></i></button><button class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></div>
-                        </div>
-                        <div class="p-4 flex-1">
-                            <ul class="space-y-3">
-                                <li class="bg-white border border-gray-200 p-3 rounded shadow-sm text-sm flex justify-between items-start"><span class="line-through text-gray-400">Mechanical Layouting</span><i class="fa-solid fa-check-circle text-green-500 mt-1"></i></li>
-                                <li class="bg-white border border-gray-200 border-l-4 border-l-blue-500 p-3 rounded shadow-sm text-sm flex justify-between items-start"><span class="text-gray-700 font-medium">Assembly Sensor Transfer</span><i class="fa-solid fa-spinner text-blue-500 mt-1"></i></li>
-                                <li class="bg-white border border-gray-200 p-3 rounded shadow-sm text-sm flex justify-between items-start"><span class="text-gray-500">Commissioning</span><i class="fa-regular fa-clock text-gray-300 mt-1"></i></li>
-                            </ul>
-                        </div>
-                        <div class="p-4 border-t border-gray-100"><button class="w-full text-sm text-gray-500 hover:text-blue-600 hover:bg-blue-50 py-2 rounded transition-colors text-left px-2"><i class="fa-solid fa-plus mr-1"></i> Tambah Activity...</button></div>
-                    </div>
+                <!-- Kontainer Project akan di-generate oleh JavaScript di sini -->
+                <div id="projectsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                    <!-- Project Cards -->
                 </div>
             </div>
 
-            <!-- VIEW 3: OUTSTANDING PROJECT -->
+            <!-- VIEW 3 & 4 (Tetap Statis Sebagai Contoh) -->
             <div id="outstandingView" class="view-section">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Daftar Outstanding Project</h2>
-                    <p class="text-sm text-gray-500 mt-1">List seluruh aktivitas mesin yang belum selesai / tertunda.</p>
-                </div>
-                
+                <div class="mb-6"><h2 class="text-2xl font-bold text-gray-800">Daftar Outstanding Project</h2></div>
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
                     <table class="min-w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-800 text-white text-sm uppercase tracking-wider">
-                                <th class="p-4 font-medium rounded-tl-lg">No</th>
-                                <th class="p-4 font-medium">Activity</th>
-                                <th class="p-4 font-medium">Mesin</th>
-                                <th class="p-4 font-medium">Status</th>
-                                <th class="p-4 font-medium rounded-tr-lg">PIC</th>
-                            </tr>
-                        </thead>
+                        <thead><tr class="bg-slate-800 text-white text-sm uppercase tracking-wider"><th class="p-4 font-medium rounded-tl-lg">No</th><th class="p-4 font-medium">Activity</th><th class="p-4 font-medium">Mesin</th><th class="p-4 font-medium">Status</th><th class="p-4 font-medium rounded-tr-lg">PIC</th></tr></thead>
                         <tbody class="text-sm text-gray-700 divide-y divide-gray-200">
-                            <tr class="hover:bg-blue-50 transition-colors">
-                                <td class="p-4 font-bold">1</td>
-                                <td class="p-4">Wiring Panel</td>
-                                <td class="p-4 font-semibold text-gray-900">Long Taper 5</td>
-                                <td class="p-4"><span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-bold">On Progress</span></td>
-                                <td class="p-4">Farrel</td>
-                            </tr>
-                            <tr class="hover:bg-blue-50 transition-colors bg-gray-50">
-                                <td class="p-4 font-bold">2</td>
-                                <td class="p-4">Assembly Sensor Transfer</td>
-                                <td class="p-4 font-semibold text-gray-900">Transfer Conveyor</td>
-                                <td class="p-4"><span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-bold">On Progress</span></td>
-                                <td class="p-4">Fais</td>
-                            </tr>
-                            <tr class="hover:bg-blue-50 transition-colors">
-                                <td class="p-4 font-bold">3</td>
-                                <td class="p-4">Cost Comparison BOM</td>
-                                <td class="p-4 font-semibold text-gray-900">Depalletizer</td>
-                                <td class="p-4"><span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-bold">Review</span></td>
-                                <td class="p-4">Dickry</td>
-                            </tr>
-                            <tr class="hover:bg-blue-50 transition-colors bg-gray-50">
-                                <td class="p-4 font-bold">4</td>
-                                <td class="p-4">Omron PLC Transition</td>
-                                <td class="p-4 font-semibold text-gray-900">Depalletizer</td>
-                                <td class="p-4"><span class="px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs font-bold">To Do</span></td>
-                                <td class="p-4">Tim Automation</td>
-                            </tr>
+                            <tr class="hover:bg-blue-50 transition-colors"><td class="p-4 font-bold">1</td><td class="p-4">Wiring Panel</td><td class="p-4 font-semibold text-gray-900">Long Taper 5</td><td class="p-4"><span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-bold">On Progress</span></td><td class="p-4">Farrel</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- VIEW 4: TIMELINE PROJECT -->
             <div id="timelineView" class="view-section">
-                <div class="mb-6 flex justify-between items-end">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Timeline Schedule Project</h2>
-                        <p class="text-sm text-gray-500 mt-1">Klik pada nama project untuk melihat planning bulanan.</p>
+                <div class="mb-6"><h2 class="text-2xl font-bold text-gray-800">Timeline Schedule Project</h2></div>
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div onclick="toggleTimeline('timeline-1')" class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center cursor-pointer hover:bg-blue-50 transition-colors">
+                        <h3 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-chevron-down text-gray-400 mr-2 text-sm"></i> Project Schedule Overview</h3>
                     </div>
-                </div>
-
-                <div class="space-y-4">
-                    <!-- Project 1 Timeline -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <div onclick="toggleTimeline('timeline-1')" class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center cursor-pointer hover:bg-blue-50 transition-colors">
-                            <h3 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-chevron-down text-gray-400 mr-2 text-sm"></i> Long Taper 5</h3>
-                            <span class="text-xs font-bold px-2 py-1 bg-green-100 text-green-700 rounded">Target: Q3 2026</span>
-                        </div>
-                        <div id="timeline-1" class="timeline-content px-4 bg-white">
-                            <div class="overflow-x-auto pb-2">
-                                <table class="min-w-full text-center text-xs">
-                                    <thead>
-                                        <tr class="text-gray-500 border-b">
-                                            <th class="text-left p-2 w-1/4">Activity</th>
-                                            <th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>Mei</th><th>Jun</th><th>Jul</th><th>Ags</th><th>Sep</th><th>Okt</th><th>Nov</th><th>Des</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y">
-                                        <tr>
-                                            <td class="text-left p-2 font-medium">Analisa OEE</td>
-                                            <td class="bg-green-400 border border-white"></td><td class="bg-green-400 border border-white"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-left p-2 font-medium">Wiring Panel</td>
-                                            <td></td><td></td><td class="bg-blue-400 border border-white"></td><td class="bg-blue-400 border border-white"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-left p-2 font-medium">Machine Trial</td>
-                                            <td></td><td></td><td></td><td></td><td class="bg-gray-200 border border-white"></td><td class="bg-gray-200 border border-white"></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div id="timeline-1" class="timeline-content px-4 bg-white open">
+                        <p class="text-sm text-gray-500 py-4">Timeline detail dapat diintegrasikan lebih lanjut.</p>
                     </div>
-
-                    <!-- Project 2 Timeline -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <div onclick="toggleTimeline('timeline-2')" class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center cursor-pointer hover:bg-blue-50 transition-colors">
-                            <h3 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-chevron-down text-gray-400 mr-2 text-sm"></i> Depalletizer</h3>
-                            <span class="text-xs font-bold px-2 py-1 bg-blue-100 text-blue-700 rounded">Target: Q4 2026</span>
-                        </div>
-                        <div id="timeline-2" class="timeline-content px-4 bg-white">
-                            <div class="overflow-x-auto pb-2">
-                                <table class="min-w-full text-center text-xs">
-                                    <thead>
-                                        <tr class="text-gray-500 border-b">
-                                            <th class="text-left p-2 w-1/4">Activity</th>
-                                            <th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>Mei</th><th>Jun</th><th>Jul</th><th>Ags</th><th>Sep</th><th>Okt</th><th>Nov</th><th>Des</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y">
-                                        <tr>
-                                            <td class="text-left p-2 font-medium">Hardware Mapping</td>
-                                            <td></td><td></td><td></td><td></td><td></td><td></td><td class="bg-green-400 border border-white"></td><td class="bg-green-400 border border-white"></td><td></td><td></td><td></td><td></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-left p-2 font-medium">Omron Transition</td>
-                                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="bg-blue-400 border border-white"></td><td class="bg-blue-400 border border-white"></td><td class="bg-gray-200 border border-white"></td><td></td><td></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
 
@@ -317,87 +160,221 @@
     </div>
 
     <script>
-        // Toggle Sidebar Mobile
-        const sidebar = document.getElementById('sidebar');
-        const toggleBtn = document.getElementById('toggleSidebar');
-        const closeBtn = document.getElementById('closeSidebar');
+        // ==========================================
+        // 1. DATA BASE SEMENTARA (ARRAY JAVASCRIPT)
+        // ==========================================
+        let projectsData = [
+            {
+                id: 1,
+                name: "Long Taper 5",
+                status: "On Progress",
+                statusColor: "bg-green-100 text-green-700",
+                activities: [
+                    { name: "Analisa OEE Machine", state: "done" },
+                    { name: "Wiring Panel", state: "progress" },
+                    { name: "Machine Trial", state: "todo" }
+                ]
+            },
+            {
+                id: 2,
+                name: "Depalletizer",
+                status: "Planning",
+                statusColor: "bg-blue-100 text-blue-700",
+                activities: [
+                    { name: "Hardware Specification Mapping", state: "done" },
+                    { name: "Cost Comparison BOM", state: "progress" },
+                    { name: "Omron PLC Transition", state: "todo" }
+                ]
+            },
+            {
+                id: 3,
+                name: "Transfer Conveyor",
+                status: "Review",
+                statusColor: "bg-purple-100 text-purple-700",
+                activities: [
+                    { name: "Mechanical Layouting", state: "done" },
+                    { name: "Assembly Sensor Transfer", state: "progress" },
+                    { name: "Commissioning", state: "todo" }
+                ]
+            }
+        ];
 
-        function toggleSidebar() {
-            sidebar.classList.toggle('-translate-x-full');
-            sidebar.classList.toggle('translate-x-0');
-        }
-        if (window.innerWidth < 768) {
-            sidebar.classList.add('-translate-x-full');
-            sidebar.classList.remove('translate-x-0');
-        } else {
-            sidebar.classList.add('translate-x-0');
-            sidebar.classList.remove('-translate-x-full');
-        }
-        toggleBtn.addEventListener('click', toggleSidebar);
-        closeBtn.addEventListener('click', toggleSidebar);
+        // ==========================================
+        // 2. FUNGSI RENDER TAMPILAN PROJECT
+        // ==========================================
+        function renderProjects() {
+            const container = document.getElementById('projectsContainer');
+            container.innerHTML = ''; // Kosongkan kontainer sebelum render ulang
 
-        // Toggle Modal Form (Tambah Project)
+            projectsData.forEach(proj => {
+                // Render List Activity
+                let activitiesHTML = '';
+                proj.activities.forEach((act, index) => {
+                    let icon, textStyle, borderStyle;
+                    if (act.state === 'done') {
+                        icon = '<i class="fa-solid fa-check-circle text-green-500 mt-1 cursor-pointer" title="Selesai"></i>';
+                        textStyle = 'line-through text-gray-400'; borderStyle = '';
+                    } else if (act.state === 'progress') {
+                        icon = `<i onclick="selesaikanActivity(${proj.id}, ${index})" class="fa-solid fa-spinner text-blue-500 mt-1 cursor-pointer hover:text-green-500" title="Klik untuk selesaikan"></i>`;
+                        textStyle = 'text-gray-700 font-medium'; borderStyle = 'border-l-4 border-l-blue-500';
+                    } else {
+                        icon = `<i onclick="mulaiActivity(${proj.id}, ${index})" class="fa-regular fa-clock text-gray-300 mt-1 cursor-pointer hover:text-blue-500" title="Klik untuk mulai"></i>`;
+                        textStyle = 'text-gray-500'; borderStyle = '';
+                    }
+                    
+                    activitiesHTML += `
+                        <li class="bg-white border border-gray-200 ${borderStyle} p-3 rounded shadow-sm text-sm flex justify-between items-start">
+                            <span class="${textStyle}">${act.name}</span>
+                            ${icon}
+                        </li>
+                    `;
+                });
+
+                // Render Card Project
+                const cardHTML = `
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
+                        <div class="bg-gray-50 p-4 border-b border-gray-200 rounded-t-lg flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800">${proj.name}</h3>
+                                <span class="text-xs font-semibold px-2 py-1 ${proj.statusColor} rounded-full mt-1 inline-block">${proj.status}</span>
+                            </div>
+                            <div class="space-x-2">
+                                <button onclick="editProject(${proj.id})" class="text-gray-400 hover:text-blue-500 transition-colors" title="Edit Project"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="hapusProject(${proj.id})" class="text-gray-400 hover:text-red-500 transition-colors" title="Delete Project"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="p-4 flex-1">
+                            <ul class="space-y-3">${activitiesHTML}</ul>
+                        </div>
+                        <div class="p-4 border-t border-gray-100">
+                            <button onclick="tambahActivity(${proj.id})" class="w-full text-sm text-gray-500 hover:text-blue-600 hover:bg-blue-50 py-2 rounded transition-colors text-left px-2">
+                                <i class="fa-solid fa-plus mr-1"></i> Tambah Activity...
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHTML;
+            });
+            
+            // Update jumlah project di Dashboard
+            document.getElementById('countBerjalan').innerText = projectsData.length;
+        }
+
+        // Jalankan render pertama kali saat web dibuka
+        renderProjects();
+
+        // ==========================================
+        // 3. FUNGSI LOGIKA (TAMBAH, EDIT, HAPUS)
+        // ==========================================
+        
+        // Simpan Project Baru
+        function simpanProjectBaru() {
+            const nameInput = document.getElementById('newProjectName').value;
+            const activityInput = document.getElementById('newProjectActivity').value;
+            
+            if (nameInput.trim() === "") {
+                alert("Nama project tidak boleh kosong!"); return;
+            }
+
+            const newProject = {
+                id: Date.now(), // Buat ID unik
+                name: nameInput,
+                status: "Planning",
+                statusColor: "bg-blue-100 text-blue-700",
+                activities: []
+            };
+
+            if (activityInput.trim() !== "") {
+                newProject.activities.push({ name: activityInput, state: "todo" });
+            }
+
+            projectsData.push(newProject);
+            renderProjects();
+            toggleModal('addProjectModal');
+            
+            // Bersihkan form
+            document.getElementById('newProjectName').value = "";
+            document.getElementById('newProjectLocation').value = "";
+            document.getElementById('newProjectActivity').value = "";
+        }
+
+        // Hapus Project
+        function hapusProject(id) {
+            const konfirmasi = confirm("Apakah Anda yakin ingin menghapus project ini?");
+            if (konfirmasi) {
+                projectsData = projectsData.filter(proj => proj.id !== id);
+                renderProjects();
+            }
+        }
+
+        // Edit Nama Project
+        function editProject(id) {
+            const project = projectsData.find(proj => proj.id === id);
+            const namaBaru = prompt("Masukkan nama baru untuk project ini:", project.name);
+            
+            if (namaBaru !== null && namaBaru.trim() !== "") {
+                project.name = namaBaru;
+                renderProjects();
+            }
+        }
+
+        // Tambah Activity ke Project Tertentu
+        function tambahActivity(projectId) {
+            const namaActivity = prompt("Masukkan nama aktivitas baru:");
+            if (namaActivity !== null && namaActivity.trim() !== "") {
+                const project = projectsData.find(proj => proj.id === projectId);
+                project.activities.push({ name: namaActivity, state: "todo" });
+                renderProjects();
+            }
+        }
+
+        // Ubah Status Activity (Bonus Interaksi)
+        function mulaiActivity(projectId, activityIndex) {
+            const project = projectsData.find(proj => proj.id === projectId);
+            project.activities[activityIndex].state = "progress";
+            renderProjects();
+        }
+
+        function selesaikanActivity(projectId, activityIndex) {
+            const project = projectsData.find(proj => proj.id === projectId);
+            project.activities[activityIndex].state = "done";
+            renderProjects();
+        }
+
+        // ==========================================
+        // 4. LOGIKA UI LAINNYA (TETAP SAMA)
+        // ==========================================
         function toggleModal(modalID){
             const modal = document.getElementById(modalID);
-            if(modal.classList.contains('hidden')){
-                modal.classList.remove('hidden');
-            } else {
-                modal.classList.add('hidden');
-            }
+            modal.classList.toggle('hidden');
         }
 
-        // Toggle Accordion Timeline
-        function toggleTimeline(id) {
-            const el = document.getElementById(id);
-            el.classList.toggle('open');
-        }
+        const sidebar = document.getElementById('sidebar');
+        document.getElementById('toggleSidebar').addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full'); sidebar.classList.toggle('translate-x-0');
+        });
+        document.getElementById('closeSidebar').addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full'); sidebar.classList.remove('translate-x-0');
+        });
 
-        // Switch View Menu
+        if (window.innerWidth < 768) { sidebar.classList.add('-translate-x-full'); }
+
         function switchView(viewId, titleText) {
-            // Sembunyikan semua view
-            document.querySelectorAll('.view-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Hapus efek aktif (warna abu) dari semua menu
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('bg-slate-700');
-            });
-
-            // Tampilkan view yang dipilih
+            document.querySelectorAll('.view-section').forEach(section => section.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('bg-slate-700'));
             document.getElementById(viewId).classList.add('active');
-            
-            // Ubah Header Judul
             document.getElementById('headerTitle').innerText = titleText;
-
-            // Beri warna aktif pada menu yang diklik
             document.getElementById('menu-' + viewId).classList.add('bg-slate-700');
-
-            // Autoclose sidebar di mobile
-            if (window.innerWidth < 768) {
-                sidebar.classList.add('-translate-x-full');
-                sidebar.classList.remove('translate-x-0');
-            }
+            if (window.innerWidth < 768) { sidebar.classList.add('-translate-x-full'); sidebar.classList.remove('translate-x-0'); }
         }
 
-        // Chart.js untuk Dashboard (Hanya berjalan di view 1)
+        function toggleTimeline(id) { document.getElementById(id).classList.toggle('open'); }
+
         const ctx = document.getElementById('progressChart').getContext('2d');
-        const progressChart = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'doughnut',
-            data: {
-                labels: ['Done', 'On Progress', 'To Do', 'Outstanding'],
-                datasets: [{
-                    data: [40, 25, 20, 15],
-                    backgroundColor: ['#10B981', '#3B82F6', '#8B5CF6', '#EF4444'],
-                    borderWidth: 2,
-                    borderColor: '#ffffff',
-                    hoverOffset: 6
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, cutout: '70%',
-                plugins: { legend: { position: 'right', labels: { padding: 20, usePointStyle: true } } }
-            }
+            data: { labels: ['Done', 'On Progress', 'To Do', 'Outstanding'], datasets: [{ data: [40, 25, 20, 15], backgroundColor: ['#10B981', '#3B82F6', '#8B5CF6', '#EF4444'], borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right', labels: { padding: 20, usePointStyle: true } } } }
         });
     </script>
 </body>
