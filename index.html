@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Monitoring Dashboard</title>
+    <!-- Tailwind CSS untuk Styling Cepat & Responsif -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js untuk Diagram Donut -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .transition-sidebar { transition: transform 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="bg-gray-100 flex h-screen overflow-hidden font-sans text-gray-800">
+
+    <!-- Sidebar (Menu Kiri) -->
+    <aside id="sidebar" class="bg-slate-800 text-white w-64 flex-shrink-0 transition-sidebar h-full absolute md:relative z-20">
+        <div class="p-4 flex justify-between items-center border-b border-slate-700">
+            <h2 class="text-xl font-bold tracking-wider"><i class="fa-solid fa-industry mr-2"></i> ENG TEAM</h2>
+            <button id="closeSidebar" class="md:hidden text-gray-300 hover:text-white">
+                <i class="fa-solid fa-times text-xl"></i>
+            </button>
+        </div>
+        <nav class="p-4 space-y-6 overflow-y-auto h-[calc(100%-4rem)] shadow-inner">
+            
+            <!-- Menu: Project Machine -->
+            <div>
+                <div class="flex justify-between items-center text-gray-400 uppercase text-xs font-semibold mb-3">
+                    <span>Project Machine</span>
+                    <!-- Tombol Tambah Mesin -->
+                    <button class="hover:text-white bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-[10px] transition-colors">
+                        <i class="fa-solid fa-plus"></i> Tambah
+                    </button>
+                </div>
+                <ul class="space-y-2 text-sm">
+                    <li class="hover:bg-slate-700 p-2 rounded cursor-pointer transition-colors"><i class="fa-solid fa-gears mr-2 text-blue-400"></i> Long Taper 5</li>
+                    <li class="hover:bg-slate-700 p-2 rounded cursor-pointer transition-colors"><i class="fa-solid fa-box-open mr-2 text-green-400"></i> Depalletizer</li>
+                    <li class="hover:bg-slate-700 p-2 rounded cursor-pointer transition-colors"><i class="fa-solid fa-dolly mr-2 text-yellow-400"></i> Transfer Conveyor</li>
+                </ul>
+            </div>
+            
+            <!-- Menu: Tasks & Schedule -->
+            <div>
+                <div class="text-gray-400 uppercase text-xs font-semibold mb-3">Manajemen Tugas</div>
+                <ul class="space-y-2 text-sm">
+                    <li class="hover:bg-slate-700 p-2 rounded cursor-pointer transition-colors">
+                        <i class="fa-solid fa-triangle-exclamation mr-2 text-red-400"></i> Outstanding Project
+                    </li>
+                    <li class="hover:bg-slate-700 p-2 rounded cursor-pointer transition-colors">
+                        <i class="fa-solid fa-calendar-days mr-2 text-purple-400"></i> Timeline Project
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Konten Utama -->
+    <div class="flex-1 flex flex-col h-full w-full relative">
+        
+        <!-- Top Navbar -->
+        <header class="bg-white shadow-sm flex items-center justify-between p-4 z-10 border-b border-gray-200">
+            <div class="flex items-center">
+                <!-- Tombol Toggle Sidebar -->
+                <button id="toggleSidebar" class="text-gray-600 hover:text-blue-600 focus:outline-none mr-4 transition-colors">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <h1 class="text-xl font-semibold text-gray-800">Dashboard Monitoring</h1>
+            </div>
+            
+            <!-- Simbol Tim Project (Pojok Kanan) -->
+            <div class="flex items-center">
+                <div class="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold shadow-md cursor-pointer hover:bg-blue-700 transition-colors" title="Tim Project">
+                    <i class="fa-solid fa-users-gear"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Area Dashboard -->
+        <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+            
+            <!-- 4 Kartu Informasi Utama -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                
+                <!-- Kartu 1: Project Berjalan -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 border-l-4 border-l-blue-500 hover:shadow-md transition-shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-50 text-blue-500 mr-4">
+                            <i class="fa-solid fa-rocket text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="mb-1 text-sm font-medium text-gray-500">Project Berjalan</p>
+                            <p class="text-2xl font-bold text-gray-800">3</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Kartu 2: Pekerjaan Dilakukan -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 border-l-4 border-l-green-500 hover:shadow-md transition-shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-50 text-green-500 mr-4">
+                            <i class="fa-solid fa-hammer text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="mb-1 text-sm font-medium text-gray-500">Pekerjaan Dilakukan</p>
+                            <p class="text-2xl font-bold text-gray-800">12</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kartu 3: Outstanding Pekerjaan -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 border-l-4 border-l-red-500 hover:shadow-md transition-shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-red-50 text-red-500 mr-4">
+                            <i class="fa-solid fa-clipboard-list text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="mb-1 text-sm font-medium text-gray-500">Outstanding Pekerjaan</p>
+                            <p class="text-2xl font-bold text-gray-800">5</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kartu 4: Done vs To Do -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 border-l-4 border-l-purple-500 hover:shadow-md transition-shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-purple-50 text-purple-500 mr-4">
+                            <i class="fa-solid fa-scale-balanced text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="mb-1 text-sm font-medium text-gray-500">Done vs To Do</p>
+                            <p class="text-2xl font-bold text-gray-800">8 / 17</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bagian Chart (Diagram Donut) -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 w-full max-w-lg mx-auto md:mx-0">
+                <h3 class="text-lg font-semibold text-gray-700 mb-6 text-center md:text-left">Progress All Project</h3>
+                <div class="relative h-64 w-full flex justify-center">
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Script Logika Interaktif -->
+    <script>
+        // 1. Logika Toggle Sidebar (Show/Hide)
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const closeBtn = document.getElementById('closeSidebar');
+
+        function toggleSidebar() {
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('translate-x-0');
+            }
+        }
+
+        // Sembunyikan sidebar secara default pada layar kecil (mobile)
+        if (window.innerWidth < 768) {
+            sidebar.classList.add('-translate-x-full');
+        }
+
+        toggleBtn.addEventListener('click', toggleSidebar);
+        closeBtn.addEventListener('click', toggleSidebar);
+
+        // 2. Logika Diagram Donut menggunakan Chart.js
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        const progressChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Done', 'On Progress', 'To Do', 'Outstanding'],
+                datasets: [{
+                    data: [40, 25, 20, 15], // Ganti angka ini dengan data aktual Anda
+                    backgroundColor: [
+                        '#10B981', // Hijau (Done)
+                        '#3B82F6', // Biru (On Progress)
+                        '#8B5CF6', // Ungu (To Do)
+                        '#EF4444'  // Merah (Outstanding)
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%', // Membuat lubang donut lebih besar/kecil
+                plugins: {
+                    legend: {
+                        position: 'right', // Posisi keterangan
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true, // Ikon bulat di legend
+                            font: {
+                                family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ' ' + context.label + ': ' + context.raw + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
