@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Transisi halus untuk sidebar */
         .sidebar-transition { transition: width 0.3s ease, padding 0.3s ease; overflow: hidden; }
         .sidebar-closed { width: 0 !important; border-width: 0 !important; }
         
@@ -16,20 +15,16 @@
         .view-section.active { display: block; animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Scrollbar Elegan */
         .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f8fafc; }
         
-        /* Sticky Column untuk Timeline */
         .sticky-col { position: sticky; left: 0; z-index: 10; background: white; }
     </style>
 </head>
 <body class="bg-slate-50 flex h-screen overflow-hidden font-sans text-slate-800">
 
     <!-- ================= MODALS ================= -->
-
-    <!-- Alert Modal -->
     <div id="customAlertModal" class="fixed inset-0 bg-slate-900/40 z-[70] hidden flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white border border-slate-200 rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6 text-center">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 border border-red-200 text-red-600 mb-4">
@@ -41,7 +36,6 @@
         </div>
     </div>
 
-    <!-- Confirm Modal -->
     <div id="customConfirmModal" class="fixed inset-0 bg-slate-900/40 z-[70] hidden flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white border border-slate-200 rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6 text-center">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-amber-100 border border-amber-200 text-amber-600 mb-4">
@@ -56,7 +50,6 @@
         </div>
     </div>
 
-    <!-- Add/Edit Project Modal -->
     <div id="addProjectModal" class="fixed inset-0 bg-slate-900/40 z-50 hidden flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white border border-slate-200 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -90,7 +83,6 @@
         </div>
     </div>
 
-    <!-- Add / Edit Activity Modal (With Slider) -->
     <div id="activityModal" class="fixed inset-0 bg-slate-900/40 z-50 hidden flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white border border-slate-200 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -120,7 +112,6 @@
                         <option value="done">Done</option>
                     </select>
                 </div>
-                <!-- Range Slider Area -->
                 <div id="progressInputContainer" class="hidden bg-amber-50 p-3 rounded-lg border border-amber-200">
                     <label class="block text-xs font-bold text-amber-600 uppercase tracking-wider mb-2">Progress Percentage (%)</label>
                     <div class="flex items-center space-x-3 mb-2">
@@ -141,7 +132,6 @@
 
     <!-- ================= SIDEBAR ================= -->
     <aside id="sidebar" class="bg-white border-r border-slate-200 w-64 flex-shrink-0 sidebar-transition h-full relative z-40 shadow-sm flex flex-col">
-        <!-- LOGO BRANDING IAT (Adapted for Light Theme) -->
         <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
             <div class="flex items-center space-x-3 overflow-hidden whitespace-nowrap">
                 <div class="relative w-10 h-10 flex items-center justify-center flex-shrink-0">
@@ -186,7 +176,6 @@
     <!-- ================= MAIN CONTENT ================= -->
     <div class="flex-1 flex flex-col h-full w-full relative min-w-0 bg-slate-50">
         
-        <!-- HEADER BAR -->
         <header class="bg-white border-b border-slate-200 flex items-center justify-between p-4 z-10 shadow-sm">
             <div class="flex items-center">
                 <button id="toggleSidebar" class="text-slate-500 hover:text-blue-600 focus:outline-none mr-4 transition-colors">
@@ -194,14 +183,11 @@
                 </button>
                 <h1 id="headerTitle" class="text-lg font-bold text-slate-800 tracking-wide">Dashboard Monitoring</h1>
             </div>
-            
             <div class="flex items-center space-x-4">
-                <!-- WIDGET JAM REALTIME -->
                 <div class="hidden sm:flex items-center bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg shadow-sm">
                     <i class="fa-regular fa-clock text-blue-500 mr-2"></i>
                     <span id="realtimeClock" class="font-mono text-sm font-bold text-blue-700">00:00:00</span>
                 </div>
-                
                 <span class="hidden md:inline-flex text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600"><i class="fa-solid fa-bolt mr-1"></i> System Online</span>
                 <div class="bg-slate-100 border border-slate-200 text-slate-600 rounded-full w-9 h-9 flex items-center justify-center font-bold shadow-sm hover:bg-slate-200 cursor-pointer transition-colors">
                     <i class="fa-solid fa-user-gear"></i>
@@ -214,66 +200,43 @@
             <!-- VIEW 1: DASHBOARD -->
             <div id="dashboardView" class="view-section active">
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-                    <!-- Project On Progress -->
                     <div class="bg-white rounded-xl p-5 border border-slate-200 border-l-4 border-l-amber-500 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex items-center">
                             <div class="p-3 rounded-lg bg-amber-50 text-amber-500 mr-4 border border-amber-100"><i class="fa-solid fa-spinner animate-spin text-2xl"></i></div>
-                            <div>
-                                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Project On Progress</p>
-                                <p class="text-3xl font-black text-slate-800" id="dashProjProgress">0</p>
-                            </div>
+                            <div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Project On Progress</p><p class="text-3xl font-black text-slate-800" id="dashProjProgress">0</p></div>
                         </div>
                     </div>
-                    <!-- Project Not Started -->
                     <div class="bg-white rounded-xl p-5 border border-slate-200 border-l-4 border-l-red-500 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex items-center">
                             <div class="p-3 rounded-lg bg-red-50 text-red-500 mr-4 border border-red-100"><i class="fa-solid fa-pause text-2xl"></i></div>
-                            <div>
-                                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Project Not Started</p>
-                                <p class="text-3xl font-black text-slate-800" id="dashProjNotStarted">0</p>
-                            </div>
+                            <div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Project Not Started</p><p class="text-3xl font-black text-slate-800" id="dashProjNotStarted">0</p></div>
                         </div>
                     </div>
-                    <!-- Project Done -->
                     <div class="bg-white rounded-xl p-5 border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex items-center">
                             <div class="p-3 rounded-lg bg-emerald-50 text-emerald-500 mr-4 border border-emerald-100"><i class="fa-solid fa-circle-check text-2xl"></i></div>
-                            <div>
-                                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Project Done</p>
-                                <p class="text-3xl font-black text-slate-800" id="dashProjDone">0</p>
-                            </div>
+                            <div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Project Done</p><p class="text-3xl font-black text-slate-800" id="dashProjDone">0</p></div>
                         </div>
                     </div>
-                    <!-- Outstanding Activity -->
                     <div class="bg-white rounded-xl p-5 border border-slate-200 border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
                         <div class="flex items-center">
                             <div class="p-3 rounded-lg bg-blue-50 text-blue-500 mr-4 border border-blue-100"><i class="fa-solid fa-list-check text-2xl"></i></div>
-                            <div>
-                                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Outstanding Activity</p>
-                                <p class="text-3xl font-black text-slate-800" id="dashOutstandingAct">0</p>
-                            </div>
+                            <div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Outstanding Activity</p><p class="text-3xl font-black text-slate-800" id="dashOutstandingAct">0</p></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <!-- Pie Chart -->
                     <div class="lg:col-span-5 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col">
                         <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center"><i class="fa-solid fa-chart-pie text-blue-500 mr-2"></i> Statistic Project</h3>
-                        <div class="relative w-full flex-1 flex justify-center items-center min-h-[250px]">
-                            <canvas id="progressChart"></canvas>
-                        </div>
+                        <div class="relative w-full flex-1 flex justify-center items-center min-h-[250px]"><canvas id="progressChart"></canvas></div>
                     </div>
-
-                    <!-- Upcoming Reminder -->
                     <div class="lg:col-span-7 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col h-full">
                         <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
                             <h3 class="text-base font-bold text-slate-800 flex items-center"><i class="fa-solid fa-bell text-amber-500 mr-2"></i> Top 5 Upcoming Activity Deadlines</h3>
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100">Reminder</span>
                         </div>
-                        <div id="reminderList" class="flex-1 space-y-3 overflow-y-auto custom-scroll pr-1">
-                            <!-- Dynamic Content -->
-                        </div>
+                        <div id="reminderList" class="flex-1 space-y-3 overflow-y-auto custom-scroll pr-1"></div>
                     </div>
                 </div>
             </div>
@@ -289,9 +252,7 @@
                         <i class="fa-solid fa-plus mr-2"></i> Add Project
                     </button>
                 </div>
-                <div id="projectsContainer" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
-                    <!-- Cards -->
-                </div>
+                <div id="projectsContainer" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 items-start"></div>
             </div>
 
             <!-- VIEW 3: OUTSTANDING PROJECT -->
@@ -300,21 +261,17 @@
                     <h2 class="text-xl font-bold text-slate-800 tracking-wide">Outstanding Activity List</h2>
                     <p class="text-xs text-slate-500">Grouped by machine and sorted by activity deadline.</p>
                 </div>
-                <div id="outstandingContainer" class="space-y-6">
-                    <!-- Tables via JS -->
-                </div>
+                <div id="outstandingContainer" class="space-y-6"></div>
             </div>
 
-            <!-- VIEW 4: TIMELINE PROJECT (GANTT CHART) -->
+            <!-- VIEW 4: TIMELINE PROJECT -->
             <div id="timelineView" class="view-section">
                 <div class="mb-6">
                     <h2 class="text-xl font-bold text-slate-800 tracking-wide">Timeline Schedule Project</h2>
-                    <p class="text-xs text-slate-500">Actual Calendar Gantt Chart based on Project Activity schedules.</p>
+                    <p class="text-xs text-slate-500">Actual Calendar Gantt Chart dynamically scales to any year automatically.</p>
                 </div>
 
-                <div id="machineTabs" class="flex flex-wrap gap-3 mb-6">
-                    <!-- Tabs -->
-                </div>
+                <div id="machineTabs" class="flex flex-wrap gap-3 mb-6"></div>
 
                 <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
                     <div class="p-5 border-b border-slate-100 bg-slate-50 flex items-center space-x-3">
@@ -324,11 +281,7 @@
                             <p id="selectedMachineDates" class="text-xs text-slate-500">Machine Schedule Overview</p>
                         </div>
                     </div>
-                    
-                    <!-- Calendar Gantt Container -->
-                    <div id="calendarBody" class="custom-scroll overflow-x-auto overflow-y-auto max-h-[600px] w-full relative">
-                        <!-- JS GENERATED -->
-                    </div>
+                    <div id="calendarBody" class="custom-scroll overflow-x-auto overflow-y-auto max-h-[600px] w-full relative"></div>
                 </div>
             </div>
 
@@ -344,11 +297,7 @@
         }, 1000);
 
         const sidebar = document.getElementById('sidebar');
-        document.getElementById('toggleSidebar').addEventListener('click', () => {
-            sidebar.classList.toggle('sidebar-closed');
-        });
-        
-        // Auto-close sidebar on mobile
+        document.getElementById('toggleSidebar').addEventListener('click', () => { sidebar.classList.toggle('sidebar-closed'); });
         if (window.innerWidth < 1024) sidebar.classList.add('sidebar-closed');
 
         function switchView(viewId, titleText) {
@@ -357,34 +306,33 @@
                 m.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-200', 'shadow-sm', 'font-bold');
                 m.classList.add('hover:bg-slate-50', 'text-slate-600', 'font-medium', 'border-transparent');
             });
-
             document.getElementById(viewId).classList.add('active');
             document.getElementById('headerTitle').innerText = titleText;
-
             const activeNav = document.getElementById('menu-' + viewId);
             activeNav.classList.remove('hover:bg-slate-50', 'text-slate-600', 'font-medium', 'border-transparent');
             activeNav.classList.add('bg-blue-50', 'text-blue-700', 'border-blue-200', 'shadow-sm', 'font-bold');
-
             if (window.innerWidth < 1024) sidebar.classList.add('sidebar-closed');
         }
 
         // ==========================================
-        // 2. DATA & STATE
+        // 2. DATA (Added 2027 Task Example)
         // ==========================================
         let projectsData = [
             {
-                id: 1, name: "Depalletizer Machine", location: "Plant 1 - Line 2", startDate: "2026-09-01", endDate: "2026-11-15", status: "On Progress",
+                id: 1, name: "Depalletizer Machine", location: "Plant 1 - Line 2", startDate: "2026-09-01", endDate: "2027-02-15", status: "On Progress",
                 activities: [
                     { id: 101, name: "Hardware Specification Mapping", startDate: "2026-09-01", endDate: "2026-09-10", state: "done", progress: 100 },
                     { id: 102, name: "Cost Comparison BOM", startDate: "2026-09-11", endDate: "2026-09-30", state: "on_progress", progress: 60 },
-                    { id: 103, name: "Wiring Panel & IO Check", startDate: "2026-10-01", endDate: "2026-11-10", state: "not_started", progress: 0 }
+                    { id: 103, name: "Wiring Panel & IO Check", startDate: "2026-10-01", endDate: "2026-11-10", state: "not_started", progress: 0 },
+                    // Contoh task menyeberang tahun ke 2027
+                    { id: 104, name: "Long Term Commissioning (Cross-Year)", startDate: "2026-12-15", endDate: "2027-02-10", state: "not_started", progress: 0 }
                 ]
             },
             {
-                id: 2, name: "Transfer Conveyor", location: "Plant 2", startDate: "2026-09-15", endDate: "2026-10-10", status: "Finish",
+                id: 2, name: "Long Taper 7", location: "Plant 2", startDate: "2026-09-15", endDate: "2026-10-10", status: "Finish",
                 activities: [
-                    { id: 201, name: "Mechanical Layouting", startDate: "2026-09-15", endDate: "2026-09-20", state: "done", progress: 100 },
-                    { id: 202, name: "Assembly Sensor Transfer", startDate: "2026-09-21", endDate: "2026-10-05", state: "done", progress: 100 }
+                    { id: 201, name: "Trial Robot", startDate: "2026-09-15", endDate: "2026-09-30", state: "on_progress", progress: 40 },
+                    { id: 202, name: "Trial Transfer Output", startDate: "2026-09-20", endDate: "2026-09-30", state: "on_progress", progress: 30 }
                 ]
             }
         ];
@@ -410,15 +358,12 @@
         function renderDashboard() {
             let pOn = 0, pNot = 0, pFin = 0, aTotal = 0, aProg = 0, aNot = 0;
             projectsData.forEach(p => {
-                if(p.status === "On Progress") pOn++;
-                if(p.status === "Not Started") pNot++;
-                if(p.status === "Finish") pFin++;
+                if(p.status === "On Progress") pOn++; if(p.status === "Not Started") pNot++; if(p.status === "Finish") pFin++;
                 p.activities.forEach(a => { if(a.state==='on_progress') aProg++; if(a.state==='not_started') aNot++; });
             });
             document.getElementById('dashProjProgress').innerText = pOn; document.getElementById('dashProjNotStarted').innerText = pNot;
             document.getElementById('dashProjDone').innerText = pFin; document.getElementById('dashOutstandingAct').innerText = (aProg + aNot);
 
-            // Chart
             if(chartInstance) { chartInstance.data.datasets[0].data = [pFin, pOn, pNot]; chartInstance.update(); }
             else {
                 const ctx = document.getElementById('progressChart').getContext('2d');
@@ -428,7 +373,6 @@
                 });
             }
 
-            // Reminders (Top 5)
             const remContainer = document.getElementById('reminderList'); remContainer.innerHTML = '';
             let acts = [];
             projectsData.forEach(p => p.activities.forEach(a => { if(a.state !== 'done') acts.push({...a, pName: p.name}); }));
@@ -439,14 +383,8 @@
                 let cls = i.state==='on_progress' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-red-50 text-red-600 border-red-200';
                 remContainer.innerHTML += `
                     <div class="p-3 bg-white rounded-lg border border-slate-200 flex justify-between items-center shadow-sm">
-                        <div>
-                            <h4 class="text-xs font-bold text-slate-800 mb-0.5">${i.name}</h4>
-                            <p class="text-[10px] text-slate-500"><i class="fa-solid fa-microchip text-blue-400 mr-1"></i>${i.pName}</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${cls} block mb-1">${i.state==='on_progress'?`On Progress ${i.progress}%`:'Not Started'}</span>
-                            <span class="text-[10px] text-slate-500 font-mono"><i class="fa-regular fa-calendar mr-1"></i>Due: ${i.endDate}</span>
-                        </div>
+                        <div><h4 class="text-xs font-bold text-slate-800 mb-0.5">${i.name}</h4><p class="text-[10px] text-slate-500"><i class="fa-solid fa-microchip text-blue-400 mr-1"></i>${i.pName}</p></div>
+                        <div class="text-right"><span class="text-[10px] font-bold px-2 py-0.5 rounded border ${cls} block mb-1">${i.state==='on_progress'?`On Progress ${i.progress}%`:'Not Started'}</span><span class="text-[10px] text-slate-500 font-mono"><i class="fa-regular fa-calendar mr-1"></i>Due: ${i.endDate}</span></div>
                     </div>`;
             });
         }
@@ -457,55 +395,28 @@
         function renderProjects() {
             const container = document.getElementById('projectsContainer'); container.innerHTML = '';
             projectsData.forEach(p => {
-                let badge = p.status === 'Finish' ? '<span class="text-[10px] font-bold px-2 py-1 rounded bg-emerald-100 text-emerald-700">FINISH</span>' :
-                            p.status === 'On Progress' ? '<span class="text-[10px] font-bold px-2 py-1 rounded bg-amber-100 text-amber-700">ON PROGRESS</span>' :
-                            '<span class="text-[10px] font-bold px-2 py-1 rounded bg-red-100 text-red-700">NOT STARTED</span>';
-
+                let badge = p.status === 'Finish' ? '<span class="text-[10px] font-bold px-2 py-1 rounded bg-emerald-100 text-emerald-700">FINISH</span>' : p.status === 'On Progress' ? '<span class="text-[10px] font-bold px-2 py-1 rounded bg-amber-100 text-amber-700">ON PROGRESS</span>' : '<span class="text-[10px] font-bold px-2 py-1 rounded bg-red-100 text-red-700">NOT STARTED</span>';
                 let actHTML = '';
                 p.activities.forEach(a => {
                     let stBg = a.state==='done'?'bg-emerald-50 border-emerald-400':(a.state==='on_progress'?'bg-amber-50 border-amber-400':'bg-red-50 border-red-400');
                     let icon = a.state==='done'?'<i class="fa-solid fa-circle-check text-emerald-500"></i>':(a.state==='on_progress'?'<i class="fa-solid fa-spinner animate-spin text-amber-500"></i>':'<i class="fa-solid fa-circle-pause text-red-500"></i>');
-                    
                     actHTML += `
                         <div class="${stBg} border-l-4 p-3 rounded-r-lg border-y border-r border-slate-200 mb-2 flex justify-between items-center group shadow-sm">
-                            <div class="pr-2">
-                                <div class="flex items-center space-x-2">${icon}<span class="font-bold text-xs text-slate-800">${a.name}</span></div>
-                                <div class="mt-1 flex items-center space-x-2 text-[10px] font-semibold text-slate-500">
-                                    <span>${a.state==='done'?'Done':(a.state==='on_progress'?`On Progress (${a.progress}%)`:'Not Started')}</span>
-                                    <span>&bull;</span><span>${a.startDate} - ${a.endDate}</span>
-                                </div>
-                            </div>
-                            <div class="flex space-x-2 opacity-50 group-hover:opacity-100 transition-opacity">
-                                <button onclick="openEditAct(${p.id}, ${a.id})" class="text-blue-500 hover:text-blue-700"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button onclick="confirmDelAct(${p.id}, ${a.id})" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash-can"></i></button>
-                            </div>
+                            <div class="pr-2"><div class="flex items-center space-x-2">${icon}<span class="font-bold text-xs text-slate-800">${a.name}</span></div><div class="mt-1 flex items-center space-x-2 text-[10px] font-semibold text-slate-500"><span>${a.state==='done'?'Done':(a.state==='on_progress'?`On Progress (${a.progress}%)`:'Not Started')}</span><span>&bull;</span><span>${a.startDate} - ${a.endDate}</span></div></div>
+                            <div class="flex space-x-2 opacity-50 group-hover:opacity-100 transition-opacity"><button onclick="openEditAct(${p.id}, ${a.id})" class="text-blue-500 hover:text-blue-700"><i class="fa-solid fa-pen-to-square"></i></button><button onclick="confirmDelAct(${p.id}, ${a.id})" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash-can"></i></button></div>
                         </div>`;
                 });
-
                 container.innerHTML += `
                     <div class="bg-white rounded-xl border border-slate-200 flex flex-col h-full overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                        <div class="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-slate-800 mb-1">${p.name}</h3>
-                                <p class="text-xs text-slate-500 mb-2"><i class="fa-solid fa-location-dot mr-1 text-blue-500"></i>${p.location}</p>
-                                ${badge}
-                            </div>
-                            <button onclick="confirmDelProj(${p.id})" class="text-slate-400 hover:text-red-500 text-sm"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                        <div class="p-5 flex-1 bg-white">
-                            ${actHTML || '<p class="text-xs text-slate-400 italic text-center py-4">No activity created yet.</p>'}
-                        </div>
-                        <div class="p-4 bg-slate-50 border-t border-slate-100">
-                            <button onclick="openAddAct(${p.id})" class="w-full text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 py-2.5 rounded-lg transition-colors">
-                                <i class="fa-solid fa-plus mr-1"></i> Add Activity
-                            </button>
-                        </div>
+                        <div class="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-start"><div><h3 class="font-bold text-lg text-slate-800 mb-1">${p.name}</h3><p class="text-xs text-slate-500 mb-2"><i class="fa-solid fa-location-dot mr-1 text-blue-500"></i>${p.location}</p>${badge}</div><button onclick="confirmDelProj(${p.id})" class="text-slate-400 hover:text-red-500 text-sm"><i class="fa-solid fa-trash-can"></i></button></div>
+                        <div class="p-5 flex-1 bg-white">${actHTML || '<p class="text-xs text-slate-400 italic text-center py-4">No activity created yet.</p>'}</div>
+                        <div class="p-4 bg-slate-50 border-t border-slate-100"><button onclick="openAddAct(${p.id})" class="w-full text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 py-2.5 rounded-lg transition-colors"><i class="fa-solid fa-plus mr-1"></i> Add Activity</button></div>
                     </div>`;
             });
         }
 
         // ==========================================
-        // 5. RENDER OUTSTANDING PROJECT
+        // 5. RENDER OUTSTANDING PROJECT (FIXED ALIGNMENT)
         // ==========================================
         function renderOutstanding() {
             const container = document.getElementById('outstandingContainer'); container.innerHTML = '';
@@ -526,19 +437,20 @@
                         </tr>`).join('');
                         
                     container.innerHTML += `
-                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-6">
                             <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
                                 <h3 class="font-bold text-sm text-blue-700"><i class="fa-solid fa-industry mr-2"></i>${p.name}</h3>
                                 <span class="text-xs font-semibold text-slate-500">${acts.length} Pending Task(s)</span>
                             </div>
                             <div class="overflow-x-auto">
-                                <table class="w-full text-left border-collapse table-auto">
+                                <!-- FIX: Menggunakan table-fixed dengan persentase lebar yang mutlak (w-5/12, w-3/12) -->
+                                <table class="w-full text-left border-collapse table-fixed min-w-[600px]">
                                     <thead>
                                         <tr class="bg-white text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-200">
-                                            <th class="p-3 w-12 text-center">No</th>
-                                            <th class="p-3">Activity</th>
-                                            <th class="p-3">Due Date</th>
-                                            <th class="p-3">Status</th>
+                                            <th class="p-3 w-16 text-center">No</th>
+                                            <th class="p-3 w-5/12">Activity</th>
+                                            <th class="p-3 w-3/12">Due Date</th>
+                                            <th class="p-3 w-3/12">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>${rows}</tbody>
@@ -565,42 +477,32 @@
 
             const selProj = projectsData.find(p => p.id === activeMachineIdForTimeline);
             document.getElementById('selectedMachineTitle').innerText = selProj.name;
-            
             const tbody = document.getElementById('calendarBody');
             
             if (selProj.activities.length === 0) {
                 document.getElementById('selectedMachineDates').innerText = "No schedule available";
-                tbody.innerHTML = `<div class="p-8 text-center text-slate-500 italic">No activities added to this machine.</div>`;
-                return;
+                tbody.innerHTML = `<div class="p-8 text-center text-slate-500 italic">No activities added to this machine.</div>`; return;
             }
 
-            // Find Min and Max Date
             let minD = new Date(Math.min(...selProj.activities.map(a => new Date(a.startDate))));
             let maxD = new Date(Math.max(...selProj.activities.map(a => new Date(a.endDate))));
             
-            // Validate Dates
-            if (isNaN(minD) || isNaN(maxD)) {
-                tbody.innerHTML = `<div class="p-8 text-center text-red-500 font-bold">Invalid dates in activity!</div>`;
-                return;
-            }
+            if (isNaN(minD) || isNaN(maxD)) { tbody.innerHTML = `<div class="p-8 text-center text-red-500 font-bold">Invalid dates in activity!</div>`; return; }
 
-            // Expand bounds to full month
-            minD = new Date(minD.getFullYear(), minD.getMonth(), 1);
-            maxD = new Date(maxD.getFullYear(), maxD.getMonth() + 1, 0); // Last day of end month
+            // FIX TIMELINE: Ekspansi ruang kalender otomatis. 
+            // Loop secara matematis menyeberang tahun tanpa limit limit (2027, 2028 dst aman)
+            minD = new Date(minD.getFullYear(), minD.getMonth(), 1); 
+            // Kita tambah margin visual +2 Bulan dari target akhir agar kalender terlihat longgar
+            maxD = new Date(maxD.getFullYear(), maxD.getMonth() + 2, 0); 
             
             document.getElementById('selectedMachineDates').innerText = `Period: ${minD.toLocaleDateString('en-GB', {month:'short', year:'numeric'})} to ${maxD.toLocaleDateString('en-GB', {month:'short', year:'numeric'})}`;
 
-            // Generate Calendar Header
             let curr = new Date(minD);
-            let monthsHeader = '';
-            let daysHeader = '';
-            let dateList = []; // store all actual dates
-
+            let monthsHeader = '', daysHeader = '', dateList = [];
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
             while (curr <= maxD) {
-                let y = curr.getFullYear();
-                let m = curr.getMonth();
+                let y = curr.getFullYear(), m = curr.getMonth();
                 let daysInMonth = new Date(y, m + 1, 0).getDate();
                 
                 monthsHeader += `<div class="flex-shrink-0 text-center text-xs font-bold text-slate-600 bg-slate-100 border-r border-slate-200 py-1" style="width: ${daysInMonth * 28}px">${monthNames[m]} ${y}</div>`;
@@ -614,12 +516,10 @@
                 curr.setMonth(curr.getMonth() + 1);
             }
 
-            // Generate Activity Rows
             let actsRowHTML = '';
             selProj.activities.forEach(act => {
                 let actStart = new Date(act.startDate); actStart.setHours(0,0,0,0);
                 let actEnd = new Date(act.endDate); actEnd.setHours(23,59,59,999);
-                
                 let barColor = act.state === 'done' ? 'bg-emerald-500' : (act.state === 'on_progress' ? 'bg-amber-400' : 'bg-red-400');
                 
                 let rowCells = '';
@@ -627,12 +527,7 @@
                     let inRange = d >= actStart && d <= actEnd;
                     let isWeekend = d.getDay() === 0 || d.getDay() === 6;
                     let bg = isWeekend ? 'bg-slate-50' : 'bg-white';
-                    
-                    rowCells += `
-                        <div class="w-[28px] h-8 flex-shrink-0 border-r border-b border-slate-100 flex items-center justify-center ${bg}">
-                            ${inRange ? `<div class="h-5 w-[28px] ${barColor} z-0 shadow-sm" title="${act.name}"></div>` : ''}
-                        </div>
-                    `;
+                    rowCells += `<div class="w-[28px] h-8 flex-shrink-0 border-r border-b border-slate-100 flex items-center justify-center ${bg}">${inRange ? `<div class="h-5 w-[28px] ${barColor} z-0 shadow-sm" title="${act.name}"></div>` : ''}</div>`;
                 });
 
                 actsRowHTML += `
@@ -642,96 +537,59 @@
                             <span class="text-[9px] text-slate-500">${act.startDate} &rsaquo; ${act.endDate}</span>
                         </div>
                         <div class="flex">${rowCells}</div>
-                    </div>
-                `;
+                    </div>`;
             });
 
             tbody.innerHTML = `
                 <div class="w-max min-w-full pb-2">
-                    <!-- Headings -->
                     <div class="flex border-b border-slate-200 sticky top-0 z-20 bg-white">
                         <div class="w-64 flex-shrink-0 sticky-col bg-slate-50 border-r border-slate-200 flex items-center p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Activity Name</div>
-                        <div>
-                            <div class="flex border-b border-slate-200">${monthsHeader}</div>
-                            <div class="flex">${daysHeader}</div>
-                        </div>
+                        <div><div class="flex border-b border-slate-200">${monthsHeader}</div><div class="flex">${daysHeader}</div></div>
                     </div>
-                    <!-- Body Rows -->
                     <div>${actsRowHTML}</div>
-                </div>
-            `;
+                </div>`;
         }
 
         // ==========================================
         // 7. CRUD & MODALS
         // ==========================================
-        function openAddProjectModal() {
-            document.getElementById('newProjectStart').value = new Date().toISOString().split('T')[0];
-            document.getElementById('newProjectEnd').value = new Date().toISOString().split('T')[0];
-            toggleModal('addProjectModal');
-        }
+        function openAddProjectModal() { document.getElementById('newProjectStart').value = new Date().toISOString().split('T')[0]; document.getElementById('newProjectEnd').value = new Date().toISOString().split('T')[0]; toggleModal('addProjectModal'); }
         function saveNewProject() {
             let n = document.getElementById('newProjectName').value, s = document.getElementById('newProjectStart').value, e = document.getElementById('newProjectEnd').value;
             if(!n || !s || !e) { showAlert("Fill Project Name and Dates!"); return; }
             projectsData.push({ id: Date.now(), name: n, location: document.getElementById('newProjectLocation').value||"-", startDate: s, endDate: e, status: "Not Started", activities: [] });
             renderAll(); toggleModal('addProjectModal'); document.getElementById('newProjectName').value = "";
         }
-        
         function openAddAct(pId) {
             activeProjectForActivity = pId; editingActivityId = null;
-            document.getElementById('actModalTitle').innerHTML = '<i class="fa-solid fa-list-check text-indigo-500 mr-2"></i>Add Activity';
-            document.getElementById('actDesc').value = ""; 
-            let td = new Date().toISOString().split('T')[0]; document.getElementById('actStart').value = td; document.getElementById('actEnd').value = td;
-            document.getElementById('actStatusSelect').value = "not_started"; 
+            document.getElementById('actModalTitle').innerHTML = '<i class="fa-solid fa-list-check text-indigo-500 mr-2"></i>Add Activity'; document.getElementById('actDesc').value = ""; 
+            let td = new Date().toISOString().split('T')[0]; document.getElementById('actStart').value = td; document.getElementById('actEnd').value = td; document.getElementById('actStatusSelect').value = "not_started"; 
             syncVal(0); toggleProgressInput(); toggleModal('activityModal');
         }
-        
         function openEditAct(pId, aId) {
             activeProjectForActivity = pId; editingActivityId = aId;
             document.getElementById('actModalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-indigo-500 mr-2"></i>Edit Activity';
             let a = projectsData.find(p=>p.id===pId).activities.find(x=>x.id===aId);
-            document.getElementById('actDesc').value = a.name; document.getElementById('actStart').value = a.startDate; document.getElementById('actEnd').value = a.endDate;
-            document.getElementById('actStatusSelect').value = a.state; 
+            document.getElementById('actDesc').value = a.name; document.getElementById('actStart').value = a.startDate; document.getElementById('actEnd').value = a.endDate; document.getElementById('actStatusSelect').value = a.state; 
             syncVal(a.progress||0); toggleProgressInput(); toggleModal('activityModal');
         }
-
-        function toggleProgressInput() {
-            let s = document.getElementById('actStatusSelect').value;
-            let c = document.getElementById('progressInputContainer');
-            if(s === 'on_progress') c.classList.remove('hidden'); else c.classList.add('hidden');
-        }
-
-        // Slider Sync Function
+        function toggleProgressInput() { let s = document.getElementById('actStatusSelect').value; let c = document.getElementById('progressInputContainer'); if(s === 'on_progress') c.classList.remove('hidden'); else c.classList.add('hidden'); }
         function syncProgress(source) {
-            let slider = document.getElementById('actProgressSlider');
-            let input = document.getElementById('actProgressInput');
+            let slider = document.getElementById('actProgressSlider'), input = document.getElementById('actProgressInput');
             if(source === 'slider') input.value = slider.value;
-            else if(source === 'input') {
-                if(input.value > 99) input.value = 99; if(input.value < 0) input.value = 0;
-                slider.value = input.value;
-            }
+            else if(source === 'input') { if(input.value > 99) input.value = 99; if(input.value < 0) input.value = 0; slider.value = input.value; }
         }
         function syncVal(val) { document.getElementById('actProgressSlider').value = val; document.getElementById('actProgressInput').value = val; }
-
         function saveActivity() {
             let d = document.getElementById('actDesc').value, s = document.getElementById('actStart').value, e = document.getElementById('actEnd').value;
             let st = document.getElementById('actStatusSelect').value, p = parseInt(document.getElementById('actProgressInput').value)||0;
             if(!d||!s||!e) { showAlert("Fill Activity Description and Dates!"); return; }
             if(new Date(s) > new Date(e)) { showAlert("End Date must be after Start Date!"); return; }
-
-            let proj = projectsData.find(p => p.id === activeProjectForActivity);
-            let finalP = st==='done'?100:(st==='not_started'?0:p);
-            
-            if(editingActivityId) {
-                let a = proj.activities.find(x=>x.id===editingActivityId);
-                a.name = d; a.startDate = s; a.endDate = e; a.state = st; a.progress = finalP;
-            } else {
-                proj.activities.push({id: Date.now(), name: d, startDate: s, endDate: e, state: st, progress: finalP});
-            }
+            let proj = projectsData.find(p => p.id === activeProjectForActivity); let finalP = st==='done'?100:(st==='not_started'?0:p);
+            if(editingActivityId) { let a = proj.activities.find(x=>x.id===editingActivityId); a.name = d; a.startDate = s; a.endDate = e; a.state = st; a.progress = finalP; } 
+            else { proj.activities.push({id: Date.now(), name: d, startDate: s, endDate: e, state: st, progress: finalP}); }
             renderAll(); toggleModal('activityModal');
         }
-
-        // Delete handlers
         function confirmDelProj(id) { pendingDeleteId = id; pendingDeleteType = 'proj'; document.getElementById('customConfirmModal').classList.remove('hidden'); }
         function confirmDelAct(pid, aid) { activeProjectForActivity = pid; pendingDeleteId = aid; pendingDeleteType = 'act'; document.getElementById('customConfirmModal').classList.remove('hidden'); }
         function closeConfirm(conf) {
@@ -742,14 +600,12 @@
                 renderAll();
             }
         }
-
         function showAlert(msg) { document.getElementById('alertMessage').innerText = msg; document.getElementById('customAlertModal').classList.remove('hidden'); }
         function closeAlert() { document.getElementById('customAlertModal').classList.add('hidden'); }
         function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
 
         function renderAll() { calculateStatuses(); renderDashboard(); renderProjects(); renderOutstanding(); renderTimeline(); }
         renderAll();
-
     </script>
 </body>
 </html>
