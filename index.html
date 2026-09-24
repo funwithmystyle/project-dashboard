@@ -10,72 +10,122 @@
     <style>
         .sidebar-transition { transition: width 0.3s ease, padding 0.3s ease; overflow: hidden; }
         .sidebar-closed { width: 0 !important; border-width: 0 !important; }
+        
         .view-section { display: none; }
         .view-section.active { display: block; animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
         .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f8fafc; }
+        
         .sticky-col { position: sticky; left: 0; z-index: 10; background: white; }
     </style>
 </head>
 <body class="bg-slate-50 flex h-screen overflow-hidden font-sans text-slate-800">
 
     <!-- ================= MODALS ================= -->
-    <!-- Modal Add Project Part Purchased -->
-    <div id="addPartProjectModal" class="fixed inset-0 bg-slate-900/40 z-50 hidden flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white border border-slate-200 rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-cart-plus text-teal-500 mr-2"></i>Add Part Project</h3>
-                <button onclick="toggleModal('addPartProjectModal')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <div id="customAlertModal" class="fixed inset-0 bg-slate-900/40 z-[70] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 border border-red-200 text-red-600 mb-4">
+                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
             </div>
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nama Project *</label>
-                    <input id="newPartProjName" type="text" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500" placeholder="e.g. Depalletizer">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Tanggal *</label>
-                    <input id="newPartProjDate" type="date" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
-                </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Warning</h3>
+            <p id="alertMessage" class="text-sm text-slate-500 mb-6">Alert message here.</p>
+            <button onclick="closeAlert()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors text-sm">Acknowledge</button>
+        </div>
+    </div>
+
+    <div id="customConfirmModal" class="fixed inset-0 bg-slate-900/40 z-[70] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-amber-100 border border-amber-200 text-amber-600 mb-4">
+                <i class="fa-solid fa-trash-can text-xl"></i>
             </div>
-            <div class="px-6 py-4 border-t border-slate-100 flex justify-end space-x-3 bg-slate-50">
-                <button onclick="toggleModal('addPartProjectModal')" class="px-4 py-2 bg-white text-slate-600 rounded-lg text-sm font-bold border border-slate-300 hover:bg-slate-50">Cancel</button>
-                <button onclick="saveNewPartProject()" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-bold shadow-md shadow-teal-500/30">Create Project</button>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Confirm Delete</h3>
+            <p id="confirmMessage" class="text-sm text-slate-500 mb-6">Are you sure you want to proceed?</p>
+            <div class="flex space-x-3">
+                <button onclick="closeConfirm(false)" class="w-full py-2 bg-white text-slate-600 font-bold rounded-lg border border-slate-300 hover:bg-slate-50 text-sm">Cancel</button>
+                <button onclick="closeConfirm(true)" class="w-full py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 text-sm">Delete</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Add Item Part -->
-    <div id="addPartItemModal" class="fixed inset-0 bg-slate-900/40 z-[60] hidden flex items-center justify-center backdrop-blur-sm">
+    <div id="addProjectModal" class="fixed inset-0 bg-slate-900/40 z-50 hidden flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white border border-slate-200 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-box-open text-teal-500 mr-2"></i>Add Sparepart</h3>
-                <button onclick="toggleModal('addPartItemModal')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-folder-plus text-blue-500 mr-2"></i>Add New Project</h3>
+                <button onclick="toggleModal('addProjectModal')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Project Name *</label>
+                    <input id="newProjectName" type="text" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="e.g. Auto Depalletizer System">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Location</label>
+                    <input id="newProjectLocation" type="text" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="e.g. Line 3 Plant B">
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">NO PP</label>
-                        <input id="itemNoPP" type="text" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500" placeholder="e.g. 260090100">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Start Date *</label>
+                        <input id="newProjectStart" type="date" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">NO LPB</label>
-                        <input id="itemNoLPB" type="text" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500" placeholder="e.g. 10050">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">End Date *</label>
+                        <input id="newProjectEnd" type="date" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Name Sparepart</label>
-                    <input id="itemName" type="text" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500" placeholder="e.g. Inverter Mitsubishi">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">AO (Account Officer/PIC)</label>
-                    <input id="itemAO" type="text" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500" placeholder="e.g. Fanny">
                 </div>
             </div>
             <div class="px-6 py-4 border-t border-slate-100 flex justify-end space-x-3 bg-slate-50">
-                <button onclick="toggleModal('addPartItemModal')" class="px-4 py-2 bg-white text-slate-600 rounded-lg text-sm font-bold border border-slate-300 hover:bg-slate-50">Cancel</button>
-                <button onclick="savePartItem()" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-bold shadow-md shadow-teal-500/30">Save Item</button>
+                <button onclick="toggleModal('addProjectModal')" class="px-4 py-2 bg-white text-slate-600 rounded-lg text-sm font-bold border border-slate-300 hover:bg-slate-50">Cancel</button>
+                <button onclick="saveNewProject()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-md shadow-blue-500/30"><i class="fa-solid fa-save mr-1"></i> Save Project</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="activityModal" class="fixed inset-0 bg-slate-900/40 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white border border-slate-200 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 id="actModalTitle" class="text-lg font-bold text-slate-800"><i class="fa-solid fa-list-check text-indigo-500 mr-2"></i>Add Activity</h3>
+                <button onclick="toggleModal('activityModal')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Activity Description *</label>
+                    <input id="actDesc" type="text" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" placeholder="e.g. PLC Ladder Logic Programming">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Start Date *</label>
+                        <input id="actStart" type="date" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">End Date *</label>
+                        <input id="actEnd" type="date" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Status</label>
+                    <select id="actStatusSelect" onchange="toggleProgressInput()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                        <option value="not_started">Not Started</option>
+                        <option value="on_progress">On Progress</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+                <div id="progressInputContainer" class="hidden bg-amber-50 p-3 rounded-lg border border-amber-200">
+                    <label class="block text-xs font-bold text-amber-600 uppercase tracking-wider mb-2">Progress Percentage (%)</label>
+                    <div class="flex items-center space-x-3 mb-2">
+                        <input id="actProgressSlider" type="range" min="0" max="99" value="50" oninput="syncProgress('slider')" class="w-full h-2 bg-amber-200 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input id="actProgressInput" type="number" min="0" max="99" value="50" oninput="syncProgress('input')" class="w-16 bg-white border border-amber-300 rounded-md px-2 py-1 text-sm font-bold text-amber-700 text-center focus:outline-none focus:border-amber-500">
+                        <span class="text-xs font-bold text-amber-600">%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-100 flex justify-end space-x-3 bg-slate-50">
+                <button onclick="toggleModal('activityModal')" class="px-4 py-2 bg-white text-slate-600 rounded-lg text-sm font-bold border border-slate-300 hover:bg-slate-50">Cancel</button>
+                <button onclick="saveActivity()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold shadow-md shadow-indigo-500/30"><i class="fa-solid fa-check mr-1"></i> Save</button>
             </div>
         </div>
     </div>
@@ -110,17 +160,13 @@
                 </ul>
             </div>
             <div>
-                <div class="text-slate-400 uppercase text-[10px] font-bold tracking-widest mb-3 whitespace-nowrap">Task & Procurement</div>
+                <div class="text-slate-400 uppercase text-[10px] font-bold tracking-widest mb-3 whitespace-nowrap">Task Management</div>
                 <ul class="space-y-1.5 text-sm">
                     <li onclick="switchView('outstandingView', 'Outstanding Project')" id="menu-outstandingView" class="menu-item whitespace-nowrap hover:bg-slate-50 p-2.5 rounded-lg cursor-pointer transition-colors flex items-center font-medium text-slate-600">
                         <i class="fa-solid fa-list-check w-6 text-center mr-2 text-amber-500"></i> Outstanding Project
                     </li>
                     <li onclick="switchView('timelineView', 'Timeline Schedule Project')" id="menu-timelineView" class="menu-item whitespace-nowrap hover:bg-slate-50 p-2.5 rounded-lg cursor-pointer transition-colors flex items-center font-medium text-slate-600">
                         <i class="fa-solid fa-calendar-days w-6 text-center mr-2 text-emerald-500"></i> Timeline Project
-                    </li>
-                    <!-- MENU BARU: PART PURCHASED -->
-                    <li onclick="switchView('partPurchasedView', 'Part Purchased Monitoring')" id="menu-partPurchasedView" class="menu-item whitespace-nowrap hover:bg-slate-50 p-2.5 rounded-lg cursor-pointer transition-colors flex items-center font-medium text-slate-600">
-                        <i class="fa-solid fa-cart-flatbed w-6 text-center mr-2 text-teal-500"></i> Part Purchased
                     </li>
                 </ul>
             </div>
@@ -137,47 +183,105 @@
                 </button>
                 <h1 id="headerTitle" class="text-lg font-bold text-slate-800 tracking-wide">Dashboard Monitoring</h1>
             </div>
+            <div class="flex items-center space-x-4">
+                <div class="hidden sm:flex items-center bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg shadow-sm">
+                    <i class="fa-regular fa-clock text-blue-500 mr-2"></i>
+                    <span id="realtimeClock" class="font-mono text-sm font-bold text-blue-700">00:00:00</span>
+                </div>
+                <span class="hidden md:inline-flex text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600"><i class="fa-solid fa-bolt mr-1"></i> System Online</span>
+                <div class="bg-slate-100 border border-slate-200 text-slate-600 rounded-full w-9 h-9 flex items-center justify-center font-bold shadow-sm hover:bg-slate-200 cursor-pointer transition-colors">
+                    <i class="fa-solid fa-user-gear"></i>
+                </div>
+            </div>
         </header>
 
         <main class="flex-1 overflow-y-auto p-6 custom-scroll">
             
-            <!-- VIEW 1: DASHBOARD (Isi tetap sama, disingkat visualisasinya) -->
+            <!-- VIEW 1: DASHBOARD -->
             <div id="dashboardView" class="view-section active">
-                 <div class="bg-white rounded-xl p-8 border border-slate-200 shadow-sm text-center">
-                    <h2 class="text-2xl font-bold text-slate-700">Dashboard Area</h2>
-                    <p class="text-slate-500 mt-2">Data chart and statistics render here.</p>
-                 </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+                    <div class="bg-white rounded-xl p-5 border border-slate-200 border-l-4 border-l-amber-500 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-amber-50 text-amber-500 mr-4 border border-amber-100"><i class="fa-solid fa-spinner animate-spin text-2xl"></i></div>
+                            <div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Project On Progress</p><p class="text-3xl font-black text-slate-800" id="dashProjProgress">0</p></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 border border-slate-200 border-l-4 border-l-red-500 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-red-50 text-red-500 mr-4 border border-red-100"><i class="fa-solid fa-pause text-2xl"></i></div>
+                            <div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Project Not Started</p><p class="text-3xl font-black text-slate-800" id="dashProjNotStarted">0</p></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-emerald-50 text-emerald-500 mr-4 border border-emerald-100"><i class="fa-solid fa-circle-check text-2xl"></i></div>
+                            <div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Project Done</p><p class="text-3xl font-black text-slate-800" id="dashProjDone">0</p></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 border border-slate-200 border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-blue-50 text-blue-500 mr-4 border border-blue-100"><i class="fa-solid fa-list-check text-2xl"></i></div>
+                            <div><p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Outstanding Activity</p><p class="text-3xl font-black text-slate-800" id="dashOutstandingAct">0</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-5 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col">
+                        <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center"><i class="fa-solid fa-chart-pie text-blue-500 mr-2"></i> Statistic Project</h3>
+                        <div class="relative w-full flex-1 flex justify-center items-center min-h-[250px]"><canvas id="progressChart"></canvas></div>
+                    </div>
+                    <div class="lg:col-span-7 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col h-full">
+                        <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                            <h3 class="text-base font-bold text-slate-800 flex items-center"><i class="fa-solid fa-bell text-amber-500 mr-2"></i> Top 5 Upcoming Activity Deadlines</h3>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100">Reminder</span>
+                        </div>
+                        <div id="reminderList" class="flex-1 space-y-3 overflow-y-auto custom-scroll pr-1"></div>
+                    </div>
+                </div>
             </div>
 
-            <!-- VIEW 2: PROJECT MACHINE (Tetap) -->
+            <!-- VIEW 2: PROJECT MACHINE -->
             <div id="projectView" class="view-section">
-                <!-- Konten Project -->
-            </div>
-
-            <!-- VIEW 3: OUTSTANDING PROJECT (Tetap) -->
-            <div id="outstandingView" class="view-section">
-                <!-- Konten Outstanding -->
-            </div>
-
-            <!-- VIEW 4: TIMELINE PROJECT (Tetap) -->
-            <div id="timelineView" class="view-section">
-                <!-- Konten Timeline -->
-            </div>
-
-            <!-- VIEW 5: PART PURCHASED (VIEW BARU) -->
-            <div id="partPurchasedView" class="view-section">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <div>
-                        <h2 class="text-xl font-bold text-slate-800 tracking-wide">Part Purchased List</h2>
-                        <p class="text-xs text-slate-500">Synchronized directly with Google Spreadsheet Database.</p>
+                        <h2 class="text-xl font-bold text-slate-800 tracking-wide">Project Machine List</h2>
+                        <p class="text-xs text-slate-500">Manage all machines, configure activities and track statuses.</p>
                     </div>
-                    <button onclick="openAddPartProjectModal()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-lg font-bold text-sm shadow-md transition-all flex items-center">
+                    <button onclick="openAddProjectModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-bold text-sm shadow-md transition-all flex items-center">
                         <i class="fa-solid fa-plus mr-2"></i> Add Project
                     </button>
                 </div>
-                
-                <div id="partPurchasedContainer" class="space-y-6">
-                    <!-- Data tabel part purchased akan dirender disini -->
+                <div id="projectsContainer" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 items-start"></div>
+            </div>
+
+            <!-- VIEW 3: OUTSTANDING PROJECT -->
+            <div id="outstandingView" class="view-section">
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-slate-800 tracking-wide">Outstanding Activity List</h2>
+                    <p class="text-xs text-slate-500">Grouped by machine and sorted by activity deadline.</p>
+                </div>
+                <div id="outstandingContainer" class="space-y-6"></div>
+            </div>
+
+            <!-- VIEW 4: TIMELINE PROJECT -->
+            <div id="timelineView" class="view-section">
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-slate-800 tracking-wide">Timeline Schedule Project</h2>
+                    <p class="text-xs text-slate-500">Actual Calendar Gantt Chart dynamically scales to any year automatically.</p>
+                </div>
+
+                <div id="machineTabs" class="flex flex-wrap gap-3 mb-6"></div>
+
+                <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+                    <div class="p-5 border-b border-slate-100 bg-slate-50 flex items-center space-x-3">
+                        <div class="p-3 bg-indigo-50 text-indigo-500 rounded-lg border border-indigo-100"><i class="fa-solid fa-microchip text-xl"></i></div>
+                        <div>
+                            <h3 id="selectedMachineTitle" class="text-lg font-bold text-slate-800">Select a Machine</h3>
+                            <p id="selectedMachineDates" class="text-xs text-slate-500">Machine Schedule Overview</p>
+                        </div>
+                    </div>
+                    <div id="calendarBody" class="custom-scroll overflow-x-auto overflow-y-auto max-h-[600px] w-full relative"></div>
                 </div>
             </div>
 
@@ -186,8 +290,12 @@
 
     <script>
         // ==========================================
-        // UI & NAVIGATION LOGIC
+        // 1. CLOCK & SIDEBAR LOGIC
         // ==========================================
+        setInterval(() => {
+            document.getElementById('realtimeClock').innerText = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second:'2-digit' });
+        }, 1000);
+
         const sidebar = document.getElementById('sidebar');
         document.getElementById('toggleSidebar').addEventListener('click', () => { sidebar.classList.toggle('sidebar-closed'); });
         if (window.innerWidth < 1024) sidebar.classList.add('sidebar-closed');
@@ -206,129 +314,298 @@
             if (window.innerWidth < 1024) sidebar.classList.add('sidebar-closed');
         }
 
-        function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
-
         // ==========================================
-        // DATA STATE & LOGIC PART PURCHASED
+        // 2. DATA (Added 2027 Task Example)
         // ==========================================
-        let partProjects = [
+        let projectsData = [
             {
-                id: 1, name: "Depalletizer", date: "26 September 2026",
-                parts: [
-                    { no: 1, no_pp: "260090100", name: "Inverter Mitsubishi", lpb: "10050", ao: "Fanny" },
-                    { no: 2, no_pp: "260090101", name: "Motor Servo HG-SR", lpb: "10051", ao: "Andi" }
+                id: 1, name: "Depalletizer Machine", location: "Plant 1 - Line 2", startDate: "2026-09-01", endDate: "2027-02-15", status: "On Progress",
+                activities: [
+                    { id: 101, name: "Hardware Specification Mapping", startDate: "2026-09-01", endDate: "2026-09-10", state: "done", progress: 100 },
+                    { id: 102, name: "Cost Comparison BOM", startDate: "2026-09-11", endDate: "2026-09-30", state: "on_progress", progress: 60 },
+                    { id: 103, name: "Wiring Panel & IO Check", startDate: "2026-10-01", endDate: "2026-11-10", state: "not_started", progress: 0 },
+                    // Contoh task menyeberang tahun ke 2027
+                    { id: 104, name: "Long Term Commissioning (Cross-Year)", startDate: "2026-12-15", endDate: "2027-02-10", state: "not_started", progress: 0 }
+                ]
+            },
+            {
+                id: 2, name: "Long Taper 7", location: "Plant 2", startDate: "2026-09-15", endDate: "2026-10-10", status: "Finish",
+                activities: [
+                    { id: 201, name: "Trial Robot", startDate: "2026-09-15", endDate: "2026-09-30", state: "on_progress", progress: 40 },
+                    { id: 202, name: "Trial Transfer Output", startDate: "2026-09-20", endDate: "2026-09-30", state: "on_progress", progress: 30 }
                 ]
             }
         ];
 
-        let activePartProjectId = null;
+        let activeMachineIdForTimeline = 1;
+        let activeProjectForActivity = null;
+        let editingActivityId = null;
+        let chartInstance = null;
+        let pendingDeleteId = null;
+        let pendingDeleteType = null;
 
-        function renderPartPurchased() {
-            const container = document.getElementById('partPurchasedContainer');
-            container.innerHTML = '';
-            
-            if (partProjects.length === 0) {
-                container.innerHTML = `<div class="bg-white rounded-xl p-10 border border-slate-200 text-center shadow-sm"><i class="fa-solid fa-cart-arrow-down text-5xl text-slate-300 mb-3 block"></i><p class="text-slate-500 font-bold">No Part Purchased Project Yet</p></div>`;
-                return;
+        function calculateStatuses() {
+            projectsData.forEach(proj => {
+                let d = 0, p = 0, t = proj.activities.length;
+                proj.activities.forEach(act => { if(act.state==='done') d++; if(act.state==='on_progress') p++; });
+                if(t===0 || (d===0 && p===0)) proj.status = "Not Started"; else if(d===t) proj.status = "Finish"; else proj.status = "On Progress";
+            });
+        }
+
+        // ==========================================
+        // 3. RENDER DASHBOARD
+        // ==========================================
+        function renderDashboard() {
+            let pOn = 0, pNot = 0, pFin = 0, aTotal = 0, aProg = 0, aNot = 0;
+            projectsData.forEach(p => {
+                if(p.status === "On Progress") pOn++; if(p.status === "Not Started") pNot++; if(p.status === "Finish") pFin++;
+                p.activities.forEach(a => { if(a.state==='on_progress') aProg++; if(a.state==='not_started') aNot++; });
+            });
+            document.getElementById('dashProjProgress').innerText = pOn; document.getElementById('dashProjNotStarted').innerText = pNot;
+            document.getElementById('dashProjDone').innerText = pFin; document.getElementById('dashOutstandingAct').innerText = (aProg + aNot);
+
+            if(chartInstance) { chartInstance.data.datasets[0].data = [pFin, pOn, pNot]; chartInstance.update(); }
+            else {
+                const ctx = document.getElementById('progressChart').getContext('2d');
+                chartInstance = new Chart(ctx, {
+                    type: 'doughnut', data: { labels: ['Finish', 'On Progress', 'Not Started'], datasets: [{ data: [pFin, pOn, pNot], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderWidth: 2, borderColor: '#ffffff', hoverOffset: 4 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom', labels: { padding: 15, color: '#475569', font: {family: 'Inter', weight: 'bold', size: 11} } } } }
+                });
             }
 
-            partProjects.forEach(p => {
-                let rows = p.parts.length > 0 ? p.parts.map((item, index) => `
-                    <tr class="hover:bg-slate-50 border-b border-slate-100 text-xs">
-                        <td class="p-3 text-center text-slate-500 font-bold">${index + 1}</td>
-                        <td class="p-3 font-mono text-teal-600 font-bold">${item.no_pp}</td>
-                        <td class="p-3 text-slate-700 font-semibold">${item.name}</td>
-                        <td class="p-3 font-mono text-slate-600">${item.lpb}</td>
-                        <td class="p-3 text-slate-600"><span class="bg-slate-100 px-2 py-1 rounded border border-slate-200"><i class="fa-regular fa-user mr-1 text-slate-400"></i>${item.ao}</span></td>
-                    </tr>
-                `).join('') : `<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400 italic">Data sparepart kosong. Silakan add sparepart.</td></tr>`;
+            const remContainer = document.getElementById('reminderList'); remContainer.innerHTML = '';
+            let acts = [];
+            projectsData.forEach(p => p.activities.forEach(a => { if(a.state !== 'done') acts.push({...a, pName: p.name}); }));
+            acts.sort((a,b) => new Date(a.endDate) - new Date(b.endDate));
+            let top5 = acts.slice(0,5);
+            if(top5.length === 0) remContainer.innerHTML = `<p class="text-xs text-slate-400 italic py-6 text-center">No upcoming activity deadlines!</p>`;
+            top5.forEach(i => {
+                let cls = i.state==='on_progress' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-red-50 text-red-600 border-red-200';
+                remContainer.innerHTML += `
+                    <div class="p-3 bg-white rounded-lg border border-slate-200 flex justify-between items-center shadow-sm">
+                        <div><h4 class="text-xs font-bold text-slate-800 mb-0.5">${i.name}</h4><p class="text-[10px] text-slate-500"><i class="fa-solid fa-microchip text-blue-400 mr-1"></i>${i.pName}</p></div>
+                        <div class="text-right"><span class="text-[10px] font-bold px-2 py-0.5 rounded border ${cls} block mb-1">${i.state==='on_progress'?`On Progress ${i.progress}%`:'Not Started'}</span><span class="text-[10px] text-slate-500 font-mono"><i class="fa-regular fa-calendar mr-1"></i>Due: ${i.endDate}</span></div>
+                    </div>`;
+            });
+        }
 
+        // ==========================================
+        // 4. RENDER PROJECT MACHINE
+        // ==========================================
+        function renderProjects() {
+            const container = document.getElementById('projectsContainer'); container.innerHTML = '';
+            projectsData.forEach(p => {
+                let badge = p.status === 'Finish' ? '<span class="text-[10px] font-bold px-2 py-1 rounded bg-emerald-100 text-emerald-700">FINISH</span>' : p.status === 'On Progress' ? '<span class="text-[10px] font-bold px-2 py-1 rounded bg-amber-100 text-amber-700">ON PROGRESS</span>' : '<span class="text-[10px] font-bold px-2 py-1 rounded bg-red-100 text-red-700">NOT STARTED</span>';
+                let actHTML = '';
+                p.activities.forEach(a => {
+                    let stBg = a.state==='done'?'bg-emerald-50 border-emerald-400':(a.state==='on_progress'?'bg-amber-50 border-amber-400':'bg-red-50 border-red-400');
+                    let icon = a.state==='done'?'<i class="fa-solid fa-circle-check text-emerald-500"></i>':(a.state==='on_progress'?'<i class="fa-solid fa-spinner animate-spin text-amber-500"></i>':'<i class="fa-solid fa-circle-pause text-red-500"></i>');
+                    actHTML += `
+                        <div class="${stBg} border-l-4 p-3 rounded-r-lg border-y border-r border-slate-200 mb-2 flex justify-between items-center group shadow-sm">
+                            <div class="pr-2"><div class="flex items-center space-x-2">${icon}<span class="font-bold text-xs text-slate-800">${a.name}</span></div><div class="mt-1 flex items-center space-x-2 text-[10px] font-semibold text-slate-500"><span>${a.state==='done'?'Done':(a.state==='on_progress'?`On Progress (${a.progress}%)`:'Not Started')}</span><span>&bull;</span><span>${a.startDate} - ${a.endDate}</span></div></div>
+                            <div class="flex space-x-2 opacity-50 group-hover:opacity-100 transition-opacity"><button onclick="openEditAct(${p.id}, ${a.id})" class="text-blue-500 hover:text-blue-700"><i class="fa-solid fa-pen-to-square"></i></button><button onclick="confirmDelAct(${p.id}, ${a.id})" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash-can"></i></button></div>
+                        </div>`;
+                });
                 container.innerHTML += `
-                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-6">
-                        <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-                            <div>
-                                <h3 class="font-bold text-sm text-teal-700 uppercase tracking-wide"><i class="fa-solid fa-folder-open mr-2"></i>${p.name}</h3>
-                                <p class="text-[10px] text-slate-500 mt-1 font-mono"><i class="fa-regular fa-calendar mr-1"></i>${p.date}</p>
+                    <div class="bg-white rounded-xl border border-slate-200 flex flex-col h-full overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                        <div class="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-start"><div><h3 class="font-bold text-lg text-slate-800 mb-1">${p.name}</h3><p class="text-xs text-slate-500 mb-2"><i class="fa-solid fa-location-dot mr-1 text-blue-500"></i>${p.location}</p>${badge}</div><button onclick="confirmDelProj(${p.id})" class="text-slate-400 hover:text-red-500 text-sm"><i class="fa-solid fa-trash-can"></i></button></div>
+                        <div class="p-5 flex-1 bg-white">${actHTML || '<p class="text-xs text-slate-400 italic text-center py-4">No activity created yet.</p>'}</div>
+                        <div class="p-4 bg-slate-50 border-t border-slate-100"><button onclick="openAddAct(${p.id})" class="w-full text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 py-2.5 rounded-lg transition-colors"><i class="fa-solid fa-plus mr-1"></i> Add Activity</button></div>
+                    </div>`;
+            });
+        }
+
+        // ==========================================
+        // 5. RENDER OUTSTANDING PROJECT (FIXED ALIGNMENT)
+        // ==========================================
+        function renderOutstanding() {
+            const container = document.getElementById('outstandingContainer'); container.innerHTML = '';
+            let hasOut = false;
+
+            projectsData.forEach(p => {
+                let acts = p.activities.filter(a => a.state !== 'done').sort((a,b) => new Date(a.endDate) - new Date(b.endDate));
+                if(acts.length > 0) {
+                    hasOut = true;
+                    let rows = acts.map((a, i) => `
+                        <tr class="hover:bg-slate-50 border-b border-slate-100 text-xs">
+                            <td class="p-3 text-center text-slate-500">${i + 1}</td>
+                            <td class="p-3 font-bold text-slate-700">${a.name}</td>
+                            <td class="p-3 font-mono text-slate-500">${a.endDate}</td>
+                            <td class="p-3">
+                                <span class="px-2 py-1 rounded text-[10px] font-bold ${a.state==='on_progress'?'bg-amber-100 text-amber-700':'bg-red-100 text-red-700'}">${a.state==='on_progress'?`On Progress (${a.progress}%)`:'Not Started'}</span>
+                            </td>
+                        </tr>`).join('');
+                        
+                    container.innerHTML += `
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-6">
+                            <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                                <h3 class="font-bold text-sm text-blue-700"><i class="fa-solid fa-industry mr-2"></i>${p.name}</h3>
+                                <span class="text-xs font-semibold text-slate-500">${acts.length} Pending Task(s)</span>
                             </div>
-                            <button onclick="openAddPartItemModal(${p.id})" class="text-[11px] font-bold px-3 py-1.5 bg-white border border-slate-300 rounded text-slate-600 hover:bg-teal-50 hover:text-teal-600 hover:border-teal-200 transition-colors">
-                                <i class="fa-solid fa-plus mr-1"></i> Add Sparepart
-                            </button>
+                            <div class="overflow-x-auto">
+                                <!-- FIX: Menggunakan table-fixed dengan persentase lebar yang mutlak (w-5/12, w-3/12) -->
+                                <table class="w-full text-left border-collapse table-fixed min-w-[600px]">
+                                    <thead>
+                                        <tr class="bg-white text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-200">
+                                            <th class="p-3 w-16 text-center">No</th>
+                                            <th class="p-3 w-5/12">Activity</th>
+                                            <th class="p-3 w-3/12">Due Date</th>
+                                            <th class="p-3 w-3/12">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>${rows}</tbody>
+                                </table>
+                            </div>
+                        </div>`;
+                }
+            });
+            if(!hasOut) container.innerHTML = `<div class="bg-white rounded-xl p-10 border border-slate-200 text-center shadow-sm"><i class="fa-solid fa-circle-check text-5xl text-emerald-400 mb-3 block"></i><p class="text-slate-600 font-bold">No outstanding tasks!</p></div>`;
+        }
+
+        // ==========================================
+        // 6. RENDER TIMELINE ACTUAL GANTT CALENDAR
+        // ==========================================
+        function renderTimeline() {
+            const tabs = document.getElementById('machineTabs'); tabs.innerHTML = '';
+            if(projectsData.length===0) return;
+            if(!projectsData.some(p => p.id === activeMachineIdForTimeline)) activeMachineIdForTimeline = projectsData[0].id;
+
+            projectsData.forEach(p => {
+                let actCls = p.id === activeMachineIdForTimeline ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50';
+                tabs.innerHTML += `<button onclick="activeMachineIdForTimeline=${p.id}; renderTimeline()" class="px-4 py-2 rounded-lg text-sm font-bold transition-colors ${actCls}"><i class="fa-solid fa-microchip mr-2"></i>${p.name}</button>`;
+            });
+
+            const selProj = projectsData.find(p => p.id === activeMachineIdForTimeline);
+            document.getElementById('selectedMachineTitle').innerText = selProj.name;
+            const tbody = document.getElementById('calendarBody');
+            
+            if (selProj.activities.length === 0) {
+                document.getElementById('selectedMachineDates').innerText = "No schedule available";
+                tbody.innerHTML = `<div class="p-8 text-center text-slate-500 italic">No activities added to this machine.</div>`; return;
+            }
+
+            let minD = new Date(Math.min(...selProj.activities.map(a => new Date(a.startDate))));
+            let maxD = new Date(Math.max(...selProj.activities.map(a => new Date(a.endDate))));
+            
+            if (isNaN(minD) || isNaN(maxD)) { tbody.innerHTML = `<div class="p-8 text-center text-red-500 font-bold">Invalid dates in activity!</div>`; return; }
+
+            // FIX TIMELINE: Ekspansi ruang kalender otomatis. 
+            // Loop secara matematis menyeberang tahun tanpa limit limit (2027, 2028 dst aman)
+            minD = new Date(minD.getFullYear(), minD.getMonth(), 1); 
+            // Kita tambah margin visual +2 Bulan dari target akhir agar kalender terlihat longgar
+            maxD = new Date(maxD.getFullYear(), maxD.getMonth() + 2, 0); 
+            
+            document.getElementById('selectedMachineDates').innerText = `Period: ${minD.toLocaleDateString('en-GB', {month:'short', year:'numeric'})} to ${maxD.toLocaleDateString('en-GB', {month:'short', year:'numeric'})}`;
+
+            let curr = new Date(minD);
+            let monthsHeader = '', daysHeader = '', dateList = [];
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+            while (curr <= maxD) {
+                let y = curr.getFullYear(), m = curr.getMonth();
+                let daysInMonth = new Date(y, m + 1, 0).getDate();
+                
+                monthsHeader += `<div class="flex-shrink-0 text-center text-xs font-bold text-slate-600 bg-slate-100 border-r border-slate-200 py-1" style="width: ${daysInMonth * 28}px">${monthNames[m]} ${y}</div>`;
+                
+                for(let d=1; d<=daysInMonth; d++) {
+                    let isWeekend = new Date(y, m, d).getDay() === 0 || new Date(y, m, d).getDay() === 6;
+                    let bg = isWeekend ? 'bg-slate-50 text-slate-400' : 'bg-white text-slate-500';
+                    daysHeader += `<div class="w-[28px] flex-shrink-0 text-center text-[10px] font-semibold border-r border-slate-200 py-1 ${bg}">${d}</div>`;
+                    dateList.push(new Date(y, m, d));
+                }
+                curr.setMonth(curr.getMonth() + 1);
+            }
+
+            let actsRowHTML = '';
+            selProj.activities.forEach(act => {
+                let actStart = new Date(act.startDate); actStart.setHours(0,0,0,0);
+                let actEnd = new Date(act.endDate); actEnd.setHours(23,59,59,999);
+                let barColor = act.state === 'done' ? 'bg-emerald-500' : (act.state === 'on_progress' ? 'bg-amber-400' : 'bg-red-400');
+                
+                let rowCells = '';
+                dateList.forEach(d => {
+                    let inRange = d >= actStart && d <= actEnd;
+                    let isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                    let bg = isWeekend ? 'bg-slate-50' : 'bg-white';
+                    rowCells += `<div class="w-[28px] h-8 flex-shrink-0 border-r border-b border-slate-100 flex items-center justify-center ${bg}">${inRange ? `<div class="h-5 w-[28px] ${barColor} z-0 shadow-sm" title="${act.name}"></div>` : ''}</div>`;
+                });
+
+                actsRowHTML += `
+                    <div class="flex w-max hover:bg-slate-50 transition-colors">
+                        <div class="w-64 flex-shrink-0 p-2 border-r border-b border-slate-200 sticky-col flex flex-col justify-center">
+                            <span class="text-[11px] font-bold text-slate-800 truncate">${act.name}</span>
+                            <span class="text-[9px] text-slate-500">${act.startDate} &rsaquo; ${act.endDate}</span>
                         </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse table-fixed min-w-[600px]">
-                                <thead>
-                                    <tr class="bg-white text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-200">
-                                        <th class="p-3 w-12 text-center">NO</th>
-                                        <th class="p-3 w-2/12">NO PP</th>
-                                        <th class="p-3 w-5/12">Name Sparepart</th>
-                                        <th class="p-3 w-2/12">NO LPB</th>
-                                        <th class="p-3 w-2/12">AO</th>
-                                    </tr>
-                                </thead>
-                                <tbody>${rows}</tbody>
-                            </table>
-                        </div>
+                        <div class="flex">${rowCells}</div>
+                    </div>`;
+            });
+
+            tbody.innerHTML = `
+                <div class="w-max min-w-full pb-2">
+                    <div class="flex border-b border-slate-200 sticky top-0 z-20 bg-white">
+                        <div class="w-64 flex-shrink-0 sticky-col bg-slate-50 border-r border-slate-200 flex items-center p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Activity Name</div>
+                        <div><div class="flex border-b border-slate-200">${monthsHeader}</div><div class="flex">${daysHeader}</div></div>
                     </div>
-                `;
-            });
+                    <div>${actsRowHTML}</div>
+                </div>`;
         }
 
         // ==========================================
-        // CRUD FUNCTIONS PART PURCHASED
+        // 7. CRUD & MODALS
         // ==========================================
-        function openAddPartProjectModal() {
-            document.getElementById('newPartProjDate').value = new Date().toISOString().split('T')[0];
-            toggleModal('addPartProjectModal');
+        function openAddProjectModal() { document.getElementById('newProjectStart').value = new Date().toISOString().split('T')[0]; document.getElementById('newProjectEnd').value = new Date().toISOString().split('T')[0]; toggleModal('addProjectModal'); }
+        function saveNewProject() {
+            let n = document.getElementById('newProjectName').value, s = document.getElementById('newProjectStart').value, e = document.getElementById('newProjectEnd').value;
+            if(!n || !s || !e) { showAlert("Fill Project Name and Dates!"); return; }
+            projectsData.push({ id: Date.now(), name: n, location: document.getElementById('newProjectLocation').value||"-", startDate: s, endDate: e, status: "Not Started", activities: [] });
+            renderAll(); toggleModal('addProjectModal'); document.getElementById('newProjectName').value = "";
         }
-
-        function saveNewPartProject() {
-            let name = document.getElementById('newPartProjName').value;
-            let date = document.getElementById('newPartProjDate').value;
-            
-            if(!name || !date) { alert("Isi Nama Project dan Tanggal!"); return; }
-
-            // Simulasi Update UI Lokal
-            partProjects.push({ id: Date.now(), name: name, date: date, parts: [] });
-            
-            // UNTUK APPS SCRIPT: Aktifkan baris di bawah saat dideploy
-            // google.script.run.withSuccessHandler(renderPartPurchased).addPartPurchasedProject(name, date);
-
-            document.getElementById('newPartProjName').value = '';
-            toggleModal('addPartProjectModal');
-            renderPartPurchased();
+        function openAddAct(pId) {
+            activeProjectForActivity = pId; editingActivityId = null;
+            document.getElementById('actModalTitle').innerHTML = '<i class="fa-solid fa-list-check text-indigo-500 mr-2"></i>Add Activity'; document.getElementById('actDesc').value = ""; 
+            let td = new Date().toISOString().split('T')[0]; document.getElementById('actStart').value = td; document.getElementById('actEnd').value = td; document.getElementById('actStatusSelect').value = "not_started"; 
+            syncVal(0); toggleProgressInput(); toggleModal('activityModal');
         }
-
-        function openAddPartItemModal(projectId) {
-            activePartProjectId = projectId;
-            document.getElementById('itemNoPP').value = '';
-            document.getElementById('itemNoLPB').value = '';
-            document.getElementById('itemName').value = '';
-            document.getElementById('itemAO').value = '';
-            toggleModal('addPartItemModal');
+        function openEditAct(pId, aId) {
+            activeProjectForActivity = pId; editingActivityId = aId;
+            document.getElementById('actModalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-indigo-500 mr-2"></i>Edit Activity';
+            let a = projectsData.find(p=>p.id===pId).activities.find(x=>x.id===aId);
+            document.getElementById('actDesc').value = a.name; document.getElementById('actStart').value = a.startDate; document.getElementById('actEnd').value = a.endDate; document.getElementById('actStatusSelect').value = a.state; 
+            syncVal(a.progress||0); toggleProgressInput(); toggleModal('activityModal');
         }
-
-        function savePartItem() {
-            let no_pp = document.getElementById('itemNoPP').value;
-            let no_lpb = document.getElementById('itemNoLPB').value;
-            let name = document.getElementById('itemName').value;
-            let ao = document.getElementById('itemAO').value;
-
-            if(!name) { alert("Nama Sparepart wajib diisi!"); return; }
-
-            let project = partProjects.find(p => p.id === activePartProjectId);
-            project.parts.push({
-                no: project.parts.length + 1, no_pp: no_pp, name: name, lpb: no_lpb, ao: ao
-            });
-
-            // UNTUK APPS SCRIPT: Panggil fungsi update ke spreadsheet disini
-            // google.script.run.withSuccessHandler(renderPartPurchased).addSparepart(project.name, dataItem);
-
-            toggleModal('addPartItemModal');
-            renderPartPurchased();
+        function toggleProgressInput() { let s = document.getElementById('actStatusSelect').value; let c = document.getElementById('progressInputContainer'); if(s === 'on_progress') c.classList.remove('hidden'); else c.classList.add('hidden'); }
+        function syncProgress(source) {
+            let slider = document.getElementById('actProgressSlider'), input = document.getElementById('actProgressInput');
+            if(source === 'slider') input.value = slider.value;
+            else if(source === 'input') { if(input.value > 99) input.value = 99; if(input.value < 0) input.value = 0; slider.value = input.value; }
         }
+        function syncVal(val) { document.getElementById('actProgressSlider').value = val; document.getElementById('actProgressInput').value = val; }
+        function saveActivity() {
+            let d = document.getElementById('actDesc').value, s = document.getElementById('actStart').value, e = document.getElementById('actEnd').value;
+            let st = document.getElementById('actStatusSelect').value, p = parseInt(document.getElementById('actProgressInput').value)||0;
+            if(!d||!s||!e) { showAlert("Fill Activity Description and Dates!"); return; }
+            if(new Date(s) > new Date(e)) { showAlert("End Date must be after Start Date!"); return; }
+            let proj = projectsData.find(p => p.id === activeProjectForActivity); let finalP = st==='done'?100:(st==='not_started'?0:p);
+            if(editingActivityId) { let a = proj.activities.find(x=>x.id===editingActivityId); a.name = d; a.startDate = s; a.endDate = e; a.state = st; a.progress = finalP; } 
+            else { proj.activities.push({id: Date.now(), name: d, startDate: s, endDate: e, state: st, progress: finalP}); }
+            renderAll(); toggleModal('activityModal');
+        }
+        function confirmDelProj(id) { pendingDeleteId = id; pendingDeleteType = 'proj'; document.getElementById('customConfirmModal').classList.remove('hidden'); }
+        function confirmDelAct(pid, aid) { activeProjectForActivity = pid; pendingDeleteId = aid; pendingDeleteType = 'act'; document.getElementById('customConfirmModal').classList.remove('hidden'); }
+        function closeConfirm(conf) {
+            document.getElementById('customConfirmModal').classList.add('hidden');
+            if(conf && pendingDeleteId) {
+                if(pendingDeleteType === 'proj') projectsData = projectsData.filter(p=>p.id!==pendingDeleteId);
+                else projectsData.find(p=>p.id===activeProjectForActivity).activities = projectsData.find(p=>p.id===activeProjectForActivity).activities.filter(a=>a.id!==pendingDeleteId);
+                renderAll();
+            }
+        }
+        function showAlert(msg) { document.getElementById('alertMessage').innerText = msg; document.getElementById('customAlertModal').classList.remove('hidden'); }
+        function closeAlert() { document.getElementById('customAlertModal').classList.add('hidden'); }
+        function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
 
-        // Panggil render awal
-        renderPartPurchased();
+        function renderAll() { calculateStatuses(); renderDashboard(); renderProjects(); renderOutstanding(); renderTimeline(); }
+        renderAll();
     </script>
 </body>
 </html>
