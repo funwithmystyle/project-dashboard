@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Monitoring Dashboard</title>
+    <title>IAT - Automation Project Monitoring</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,140 +11,165 @@
         .transition-sidebar { transition: transform 0.3s ease-in-out; }
         .view-section { display: none; }
         .view-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        /* Custom scrollbar untuk gantt chart */
-        .gantt-scroll::-webkit-scrollbar { height: 8px; }
-        .gantt-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #0f172a; }
+        .cyber-border { border: 1px solid rgba(56, 189, 248, 0.2); }
+        .glow-cyan:hover { box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
     </style>
 </head>
-<body class="bg-gray-100 flex h-screen overflow-hidden font-sans text-gray-800 relative">
+<body class="bg-slate-950 flex h-screen overflow-hidden font-sans text-slate-200 relative">
 
-    <!-- ================= MODALS (POP-UPS MODERN) ================= -->
+    <!-- ================= MODALS ================= -->
 
-    <!-- 1. Modal Alert Kustom -->
-    <div id="customAlertModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-[70] hidden flex items-center justify-center transition-opacity backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform transition-all text-center p-6">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                <i class="fa-solid fa-triangle-exclamation text-red-600 text-xl"></i>
+    <!-- Alert Modal -->
+    <div id="customAlertModal" class="fixed inset-0 bg-slate-950/80 z-[70] hidden flex items-center justify-center backdrop-blur-md">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-500/10 border border-red-500/30 text-red-500 mb-4">
+                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
             </div>
-            <h3 class="text-lg leading-6 font-bold text-gray-900 mb-2">Peringatan</h3>
-            <p id="alertMessage" class="text-sm text-gray-500 mb-6">Pesan peringatan di sini.</p>
-            <button onclick="closeAlert()" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm transition-colors">
-                Mengerti
-            </button>
+            <h3 class="text-lg font-bold text-white mb-2">Warning</h3>
+            <p id="alertMessage" class="text-sm text-slate-400 mb-6">Alert message here.</p>
+            <button onclick="closeAlert()" class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg transition-colors text-sm">Acknowledge</button>
         </div>
     </div>
 
-    <!-- 2. Modal Confirm Kustom -->
-    <div id="customConfirmModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-[70] hidden flex items-center justify-center transition-opacity backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform transition-all text-center p-6">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 mb-4">
-                <i class="fa-solid fa-trash-can text-orange-600 text-xl"></i>
+    <!-- Confirm Modal -->
+    <div id="customConfirmModal" class="fixed inset-0 bg-slate-950/80 z-[70] hidden flex items-center justify-center backdrop-blur-md">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500 mb-4">
+                <i class="fa-solid fa-trash-can text-xl"></i>
             </div>
-            <h3 class="text-lg leading-6 font-bold text-gray-900 mb-2">Konfirmasi Hapus</h3>
-            <p id="confirmMessage" class="text-sm text-gray-500 mb-6">Apakah Anda yakin?</p>
+            <h3 class="text-lg font-bold text-white mb-2">Confirm Delete</h3>
+            <p id="confirmMessage" class="text-sm text-slate-400 mb-6">Are you sure you want to proceed?</p>
             <div class="flex space-x-3">
-                <button onclick="closeConfirm(false)" class="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:text-sm transition-colors">Batal</button>
-                <button onclick="closeConfirm(true)" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 sm:text-sm transition-colors">Hapus</button>
+                <button onclick="closeConfirm(false)" class="w-full py-2 bg-slate-800 text-slate-300 font-bold rounded-lg border border-slate-700 hover:bg-slate-700 text-sm">Cancel</button>
+                <button onclick="closeConfirm(true)" class="w-full py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-500 text-sm">Delete</button>
             </div>
         </div>
     </div>
 
-    <!-- 3. Modal Tambah Project -->
-    <div id="addProjectModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-50 hidden flex items-center justify-center transition-opacity backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
-                <h3 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-folder-plus text-blue-600 mr-2"></i>Tambah Project Baru</h3>
-                <button onclick="toggleModal('addProjectModal')" class="text-gray-400 hover:text-red-500 transition-colors">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+    <!-- Add/Edit Project Modal -->
+    <div id="addProjectModal" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-center justify-center backdrop-blur-md">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-folder-plus text-cyan-400 mr-2"></i>Add New Project</h3>
+                <button onclick="toggleModal('addProjectModal')" class="text-slate-400 hover:text-red-400"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-6 space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Project *</label>
-                    <input id="newProjectName" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-gray-50" placeholder="Contoh: Auto Packing Machine">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Project Name *</label>
+                    <input id="newProjectName" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500" placeholder="e.g. Auto Depalletizer System">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Lokasi Project</label>
-                    <input id="newProjectLocation" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-gray-50" placeholder="Contoh: Line Produksi A">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Location</label>
+                    <input id="newProjectLocation" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500" placeholder="e.g. Line 3 Plant B">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tgl Start *</label>
-                        <input id="newProjectStart" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-blue-500 bg-gray-50">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Start Date *</label>
+                        <input id="newProjectStart" type="date" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tgl End *</label>
-                        <input id="newProjectEnd" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-blue-500 bg-gray-50">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">End Date *</label>
+                        <input id="newProjectEnd" type="date" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500">
                     </div>
                 </div>
             </div>
-            <div class="px-6 py-4 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50">
-                <button onclick="toggleModal('addProjectModal')" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-bold shadow-sm">Batal</button>
-                <button onclick="simpanProjectBaru()" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-bold shadow-sm"><i class="fa-solid fa-save mr-1"></i> Simpan Project</button>
+            <div class="px-6 py-4 border-t border-slate-800 flex justify-end space-x-3 bg-slate-900/50">
+                <button onclick="toggleModal('addProjectModal')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-sm font-bold border border-slate-700 hover:bg-slate-700">Cancel</button>
+                <button onclick="saveNewProject()" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-sm font-bold shadow-lg shadow-cyan-600/30"><i class="fa-solid fa-save mr-1"></i> Save Project</button>
             </div>
         </div>
     </div>
 
-    <!-- 4. Modal Tambah Activity -->
-    <div id="addActivityModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-50 hidden flex items-center justify-center transition-opacity backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
-                <h3 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-clipboard-list text-purple-600 mr-2"></i>Tambah Aktivitas Baru</h3>
-                <button onclick="toggleModal('addActivityModal')" class="text-gray-400 hover:text-red-500 transition-colors">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+    <!-- Add / Edit Activity Modal -->
+    <div id="activityModal" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-center justify-center backdrop-blur-md">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                <h3 id="actModalTitle" class="text-lg font-bold text-white"><i class="fa-solid fa-list-check text-purple-400 mr-2"></i>Add Activity</h3>
+                <button onclick="toggleModal('activityModal')" class="text-slate-400 hover:text-red-400"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-6 space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Deskripsi Aktivitas *</label>
-                    <input id="newActDesc" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 bg-gray-50" placeholder="Contoh: Wiring Sensor">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Activity Description *</label>
+                    <input id="actDesc" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" placeholder="e.g. PLC Ladder Logic Programming">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tgl Start *</label>
-                        <input id="newActStart" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-purple-500 bg-gray-50">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Start Date *</label>
+                        <input id="actStart" type="date" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tgl End *</label>
-                        <input id="newActEnd" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-purple-500 bg-gray-50">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">End Date *</label>
+                        <input id="actEnd" type="date" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Status</label>
+                    <select id="actStatusSelect" onchange="toggleProgressInput()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                        <option value="not_started">Not Started</option>
+                        <option value="on_progress">On Progress</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+                <div id="progressInputContainer" class="hidden">
+                    <label class="block text-xs font-bold text-amber-400 uppercase tracking-wider mb-1">Progress Percentage (%)</label>
+                    <div class="flex items-center space-x-3">
+                        <input id="actProgressInput" type="number" min="0" max="99" value="50" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500" placeholder="1 - 99">
+                        <span class="text-sm font-bold text-amber-400">%</span>
                     </div>
                 </div>
             </div>
-            <div class="px-6 py-4 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50">
-                <button onclick="toggleModal('addActivityModal')" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-bold shadow-sm">Batal</button>
-                <button onclick="simpanAktivitasBaru()" class="px-5 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-bold shadow-sm"><i class="fa-solid fa-plus mr-1"></i> Simpan Aktivitas</button>
+            <div class="px-6 py-4 border-t border-slate-800 flex justify-end space-x-3 bg-slate-900/50">
+                <button onclick="toggleModal('activityModal')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-sm font-bold border border-slate-700 hover:bg-slate-700">Cancel</button>
+                <button onclick="saveActivity()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-bold shadow-lg shadow-purple-600/30"><i class="fa-solid fa-check mr-1"></i> Save Activity</button>
             </div>
         </div>
     </div>
 
     <!-- ================= SIDEBAR & LAYOUT ================= -->
-    <aside id="sidebar" class="bg-slate-800 text-white w-64 flex-shrink-0 transition-sidebar h-full absolute md:relative z-40">
-        <div class="p-4 flex justify-between items-center border-b border-slate-700">
-            <h2 class="text-xl font-bold tracking-wider"><i class="fa-solid fa-industry mr-2"></i> ENG TEAM</h2>
-            <button id="closeSidebar" class="md:hidden text-gray-300 hover:text-white">
-                <i class="fa-solid fa-times text-xl"></i>
+    <aside id="sidebar" class="bg-slate-900 border-r border-slate-800 w-64 flex-shrink-0 transition-sidebar h-full absolute md:relative z-40">
+        <!-- LOGO BRANDING IAT -->
+        <div class="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
+            <div class="flex items-center space-x-3">
+                <!-- SVG Logo: Gear + Lightning Bolt + IAT -->
+                <div class="relative w-10 h-10 flex items-center justify-center">
+                    <svg class="w-10 h-10" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50 20 C52 20 54 18 55 16 L57 12 C58 10 62 10 63 12 L65 16 C66 18 68 20 70 20 L75 19 C77 19 80 22 79 24 L78 29 C78 31 79 33 81 34 L85 36 C87 37 88 41 86 43 L83 46 C82 48 82 50 83 52 L86 55 C88 57 87 61 85 62 L81 64 C79 65 78 67 78 69 L79 74 C80 76 77 79 75 79 L70 78 C68 78 66 80 65 82 L63 86 C62 88 58 88 57 86 L55 82 C54 80 52 78 50 78 L45 79 C43 79 40 76 41 74 L42 69 C42 67 41 65 39 64 L35 62 C33 61 32 57 34 55 L37 52 C38 50 38 48 37 46 L34 43 C32 41 33 37 35 36 L39 34 C41 33 42 31 42 29 L41 24 C40 22 43 19 45 19 L50 20 Z" fill="#475569" stroke="#64748B" stroke-width="2"/>
+                        <path d="M48 8 L22 55 H44 L36 92 L72 42 H50 L58 8 Z" fill="#FACC15" stroke="#EAB308" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-xl font-black tracking-wider text-white">IAT</h2>
+                    <p class="text-[9px] font-bold text-amber-400 tracking-widest uppercase">Automation System</p>
+                </div>
+            </div>
+            <button id="closeSidebar" class="md:hidden text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
             </button>
         </div>
-        <nav class="p-4 space-y-6 overflow-y-auto h-[calc(100%-4rem)] shadow-inner">
+
+        <nav class="p-4 space-y-6 overflow-y-auto h-[calc(100%-5rem)] custom-scroll">
             <div>
-                <div class="text-gray-400 uppercase text-xs font-semibold mb-3">Menu Utama</div>
-                <ul class="space-y-2 text-sm">
-                    <li onclick="switchView('dashboardView', 'Dashboard Monitoring')" id="menu-dashboardView" class="menu-item hover:bg-slate-700 p-2 rounded-lg cursor-pointer transition-colors flex items-center bg-slate-700 font-medium">
-                        <i class="fa-solid fa-chart-pie w-6 text-center mr-2 text-white"></i> Dashboard
+                <div class="text-slate-500 uppercase text-[10px] font-bold tracking-widest mb-3">Main Navigation</div>
+                <ul class="space-y-1.5 text-sm">
+                    <li onclick="switchView('dashboardView', 'Dashboard Monitoring')" id="menu-dashboardView" class="menu-item hover:bg-slate-800 p-2.5 rounded-lg cursor-pointer transition-colors flex items-center bg-slate-800 font-bold text-white border border-slate-700">
+                        <i class="fa-solid fa-chart-pie w-6 text-center mr-2 text-cyan-400"></i> Dashboard
                     </li>
-                    <li onclick="switchView('projectView', 'Project Machine')" id="menu-projectView" class="menu-item hover:bg-slate-700 p-2 rounded-lg cursor-pointer transition-colors flex items-center font-medium">
-                        <i class="fa-solid fa-gears w-6 text-center mr-2 text-blue-400"></i> Project Machine
+                    <li onclick="switchView('projectView', 'Project Machine')" id="menu-projectView" class="menu-item hover:bg-slate-800 p-2.5 rounded-lg cursor-pointer transition-colors flex items-center font-medium text-slate-300">
+                        <i class="fa-solid fa-microchip w-6 text-center mr-2 text-blue-400"></i> Project Machine
                     </li>
                 </ul>
             </div>
             <div>
-                <div class="text-gray-400 uppercase text-xs font-semibold mb-3">Manajemen Tugas</div>
-                <ul class="space-y-2 text-sm">
-                    <li onclick="switchView('outstandingView', 'Outstanding Project')" id="menu-outstandingView" class="menu-item hover:bg-slate-700 p-2 rounded-lg cursor-pointer transition-colors flex items-center font-medium">
-                        <i class="fa-solid fa-triangle-exclamation w-6 text-center mr-2 text-red-400"></i> Outstanding Project
+                <div class="text-slate-500 uppercase text-[10px] font-bold tracking-widest mb-3">Task Management</div>
+                <ul class="space-y-1.5 text-sm">
+                    <li onclick="switchView('outstandingView', 'Outstanding Project')" id="menu-outstandingView" class="menu-item hover:bg-slate-800 p-2.5 rounded-lg cursor-pointer transition-colors flex items-center font-medium text-slate-300">
+                        <i class="fa-solid fa-list-check w-6 text-center mr-2 text-amber-400"></i> Outstanding Project
                     </li>
-                    <li onclick="switchView('timelineView', 'Timeline Project')" id="menu-timelineView" class="menu-item hover:bg-slate-700 p-2 rounded-lg cursor-pointer transition-colors flex items-center font-medium">
+                    <li onclick="switchView('timelineView', 'Timeline Schedule Project')" id="menu-timelineView" class="menu-item hover:bg-slate-800 p-2.5 rounded-lg cursor-pointer transition-colors flex items-center font-medium text-slate-300">
                         <i class="fa-solid fa-calendar-days w-6 text-center mr-2 text-purple-400"></i> Timeline Project
                     </li>
                 </ul>
@@ -152,79 +177,146 @@
         </nav>
     </aside>
 
-    <div class="flex-1 flex flex-col h-full w-full relative">
-        <header class="bg-white shadow-sm flex items-center justify-between p-4 z-10 border-b border-gray-200">
+    <div class="flex-1 flex flex-col h-full w-full relative overflow-hidden bg-slate-950">
+        <!-- HEADER BAR -->
+        <header class="bg-slate-900 border-b border-slate-800 flex items-center justify-between p-4 z-10">
             <div class="flex items-center">
-                <button id="toggleSidebar" class="text-gray-600 hover:text-blue-600 focus:outline-none mr-4 transition-colors">
-                    <i class="fa-solid fa-bars text-xl"></i>
+                <button id="toggleSidebar" class="text-slate-400 hover:text-cyan-400 focus:outline-none mr-4 transition-colors">
+                    <i class="fa-solid fa-bars-staggered text-xl"></i>
                 </button>
-                <h1 id="headerTitle" class="text-xl font-bold text-gray-800">Dashboard Monitoring</h1>
+                <h1 id="headerTitle" class="text-lg font-bold text-white tracking-wide">Dashboard Monitoring</h1>
             </div>
-            <div class="flex items-center">
-                <div class="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold shadow-md cursor-pointer hover:bg-blue-700 transition-colors">
-                    <i class="fa-solid fa-user-astronaut"></i>
+            <div class="flex items-center space-x-3">
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-cyan-950 border border-cyan-500/30 text-cyan-400"><i class="fa-solid fa-bolt mr-1"></i> System Online</span>
+                <div class="bg-slate-800 border border-slate-700 text-cyan-400 rounded-lg w-9 h-9 flex items-center justify-center font-bold shadow-sm">
+                    <i class="fa-solid fa-user-gear"></i>
                 </div>
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+        <main class="flex-1 overflow-y-auto p-6 custom-scroll">
             
             <!-- VIEW 1: DASHBOARD -->
             <div id="dashboardView" class="view-section active">
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-                    <!-- Link to Project On Progress -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 border-l-4 border-l-yellow-500 transform hover:-translate-y-1 transition-all"><div class="flex items-center"><div class="p-3 rounded-full bg-yellow-50 text-yellow-500 mr-4"><i class="fa-solid fa-spinner animate-spin-slow text-xl"></i></div><div><p class="mb-1 text-sm font-bold text-gray-500 uppercase tracking-wide">Project On Progress</p><p class="text-3xl font-black text-gray-800" id="dashProjProgress">0</p></div></div></div>
-                    <!-- Link to Project Not Started -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 border-l-4 border-l-red-500 transform hover:-translate-y-1 transition-all"><div class="flex items-center"><div class="p-3 rounded-full bg-red-50 text-red-500 mr-4"><i class="fa-solid fa-box-open text-xl"></i></div><div><p class="mb-1 text-sm font-bold text-gray-500 uppercase tracking-wide">Project Not Started</p><p class="text-3xl font-black text-gray-800" id="dashProjNotStarted">0</p></div></div></div>
-                    <!-- Link to Outstanding Activities -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 border-l-4 border-l-orange-500 transform hover:-translate-y-1 transition-all"><div class="flex items-center"><div class="p-3 rounded-full bg-orange-50 text-orange-500 mr-4"><i class="fa-solid fa-clipboard-list text-xl"></i></div><div><p class="mb-1 text-sm font-bold text-gray-500 uppercase tracking-wide">Outstanding Pkrjaan</p><p class="text-3xl font-black text-gray-800" id="dashOutstanding">0</p></div></div></div>
-                    <!-- Link to Done vs Todo -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 border-l-4 border-l-green-500 transform hover:-translate-y-1 transition-all"><div class="flex items-center"><div class="p-3 rounded-full bg-green-50 text-green-500 mr-4"><i class="fa-solid fa-scale-balanced text-xl"></i></div><div><p class="mb-1 text-sm font-bold text-gray-500 uppercase tracking-wide">Done vs To Do (Act)</p><p class="text-3xl font-black text-gray-800" id="dashDoneTodo">0 / 0</p></div></div></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+                    <!-- Project On Progress -->
+                    <div class="bg-slate-900/90 rounded-xl p-5 border border-slate-800 border-l-4 border-l-amber-500 glow-cyan">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-amber-500/10 text-amber-400 mr-4 border border-amber-500/20"><i class="fa-solid fa-spinner animate-spin text-2xl"></i></div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Project On Progress</p>
+                                <p class="text-3xl font-black text-white" id="dashProjProgress">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Project Not Started -->
+                    <div class="bg-slate-900/90 rounded-xl p-5 border border-slate-800 border-l-4 border-l-red-500 glow-cyan">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-red-500/10 text-red-400 mr-4 border border-red-500/20"><i class="fa-solid fa-pause text-2xl"></i></div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Project Not Started</p>
+                                <p class="text-3xl font-black text-white" id="dashProjNotStarted">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Project Done (Machine Level) -->
+                    <div class="bg-slate-900/90 rounded-xl p-5 border border-slate-800 border-l-4 border-l-emerald-500 glow-cyan">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-emerald-500/10 text-emerald-400 mr-4 border border-emerald-500/20"><i class="fa-solid fa-[#00ffbb] fa-circle-check text-2xl"></i></div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Project Done</p>
+                                <p class="text-3xl font-black text-white" id="dashProjDone">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Outstanding Activity -->
+                    <div class="bg-slate-900/90 rounded-xl p-5 border border-slate-800 border-l-4 border-l-cyan-500 glow-cyan">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-cyan-500/10 text-cyan-400 mr-4 border border-cyan-500/20"><i class="fa-solid fa-list-check text-2xl"></i></div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Outstanding Activity</p>
+                                <p class="text-3xl font-black text-white" id="dashOutstandingAct">0</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 w-full max-w-lg mx-auto md:mx-0">
-                    <h3 class="text-lg font-bold text-gray-700 mb-6 text-center md:text-left">Statistik Aktivitas Project</h3>
-                    <div class="relative h-64 w-full flex justify-center"><canvas id="progressChart"></canvas></div>
+
+                <!-- STATISTIC & REMINDER WIDGET -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Pie Chart Widget -->
+                    <div class="lg:col-span-5 bg-slate-900/90 border border-slate-800 rounded-xl p-6">
+                        <h3 class="text-base font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-chart-pie text-cyan-400 mr-2"></i> Statistic Project</h3>
+                        <div class="relative h-64 w-full flex justify-center"><canvas id="progressChart"></canvas></div>
+                    </div>
+
+                    <!-- Top 5 Upcoming Deadlines Reminder Widget -->
+                    <div class="lg:col-span-7 bg-slate-900/90 border border-slate-800 rounded-xl p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+                                <h3 class="text-base font-bold text-white flex items-center"><i class="fa-solid fa-bell text-amber-400 mr-2"></i> Top 5 Upcoming Activity Deadlines</h3>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Reminder</span>
+                            </div>
+                            <div id="reminderList" class="space-y-2.5">
+                                <!-- Dynamic List -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- VIEW 2: PROJECT MACHINE -->
             <div id="projectView" class="view-section">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-                    <h2 class="text-2xl font-black text-gray-800 tracking-tight">Daftar Project Mesin</h2>
-                    <button onclick="bukaModalTambahProject()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg shadow-md transition-all transform hover:scale-105 text-sm font-bold">
-                        <i class="fa-solid fa-plus mr-2"></i> Tambah Project
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white tracking-wide">Project Machine List</h2>
+                        <p class="text-xs text-slate-400">Manage all machines, configure activities and track statuses.</p>
+                    </div>
+                    <button onclick="openAddProjectModal()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2.5 rounded-lg font-bold text-sm shadow-lg shadow-cyan-600/30 transition-all flex items-center">
+                        <i class="fa-solid fa-plus mr-2"></i> Add Project
                     </button>
                 </div>
                 <div id="projectsContainer" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
-                    <!-- Data Project Render via JS -->
+                    <!-- Cards via JS -->
                 </div>
             </div>
 
             <!-- VIEW 3: OUTSTANDING PROJECT -->
             <div id="outstandingView" class="view-section">
-                <div class="mb-6"><h2 class="text-2xl font-black text-gray-800 tracking-tight">Daftar Outstanding Project</h2></div>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
-                    <table class="min-w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-800 text-white text-xs uppercase tracking-wider font-bold">
-                                <th class="p-4 rounded-tl-xl w-16 text-center">No</th>
-                                <th class="p-4">Aktivitas (Tugas)</th>
-                                <th class="p-4">Project Mesin</th>
-                                <th class="p-4">Target Tgl</th>
-                                <th class="p-4 rounded-tr-xl">Status Saat Ini</th>
-                            </tr>
-                        </thead>
-                        <tbody id="outstandingTableBody" class="text-sm text-gray-700 divide-y divide-gray-100">
-                        </tbody>
-                    </table>
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-white tracking-wide">Outstanding Activity List</h2>
+                    <p class="text-xs text-slate-400">Grouped by machine and sorted by activity deadline.</p>
+                </div>
+                <div id="outstandingContainer" class="space-y-6">
+                    <!-- Grouped Tables via JS -->
                 </div>
             </div>
 
-            <!-- VIEW 4: TIMELINE PROJECT -->
+            <!-- VIEW 4: TIMELINE PROJECT (CALENDAR VIEW) -->
             <div id="timelineView" class="view-section">
-                <div class="mb-6"><h2 class="text-2xl font-black text-gray-800 tracking-tight">Timeline Schedule Project (Gantt)</h2></div>
-                <div id="timelineContainer" class="space-y-4">
-                    <!-- Gantt Charts Render via JS -->
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-white tracking-wide">Timeline Schedule Project</h2>
+                    <p class="text-xs text-slate-400">Select a machine below to view its interactive schedule calendar.</p>
+                </div>
+
+                <!-- Machine Tabs Selector -->
+                <div id="machineTabs" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+                    <!-- Machine Buttons via JS -->
+                </div>
+
+                <!-- Interactive Calendar Container -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+                    <div id="calendarHeader" class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-4 mb-6">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-3 bg-cyan-500/10 text-cyan-400 rounded-lg border border-cyan-500/30"><i class="fa-solid fa-microchip text-2xl"></i></div>
+                            <div>
+                                <h3 id="selectedMachineTitle" class="text-lg font-bold text-white">Select a Machine</h3>
+                                <p id="selectedMachineDates" class="text-xs text-slate-400">Machine Schedule Overview</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="calendarBody" class="custom-scroll overflow-x-auto">
+                        <!-- Calendar Schedule Grid via JS -->
+                    </div>
                 </div>
             </div>
 
@@ -233,50 +325,56 @@
 
     <script>
         // ==========================================
-        // 1. DATABASE UTAMA (DENGAN TANGGAL)
+        // 1. DATABASE & INITIAL DATA
         // ==========================================
         let projectsData = [
             {
                 id: 1,
-                name: "Depalletizer",
-                location: "Plant 1",
+                name: "Depalletizer Machine",
+                location: "Plant 1 - Line 2",
                 startDate: "2026-10-01",
                 endDate: "2026-10-31",
-                status: "", statusColor: "", // Akan dihitung otomatis
+                status: "On Progress",
                 activities: [
-                    { id: 101, name: "Hardware Specification Mapping", startDate: "2026-10-01", endDate: "2026-10-05", state: "done" },
-                    { id: 102, name: "Cost Comparison BOM", startDate: "2026-10-06", endDate: "2026-10-10", state: "on_progress" },
-                    { id: 103, name: "Wiring Panel", startDate: "2026-10-11", endDate: "2026-10-25", state: "not_started" }
+                    { id: 101, name: "Hardware Specification Mapping", startDate: "2026-10-01", endDate: "2026-10-05", state: "done", progress: 100 },
+                    { id: 102, name: "Cost Comparison BOM", startDate: "2026-10-06", endDate: "2026-10-12", state: "on_progress", progress: 60 },
+                    { id: 103, name: "Wiring Panel & IO Check", startDate: "2026-10-15", endDate: "2026-10-25", state: "not_started", progress: 0 }
                 ]
             },
             {
                 id: 2,
                 name: "Transfer Conveyor",
                 location: "Plant 2",
-                startDate: "2026-10-15",
-                endDate: "2026-11-15",
-                status: "", statusColor: "",
+                startDate: "2026-09-15",
+                endDate: "2026-10-10",
+                status: "Finish",
                 activities: [
-                    { id: 201, name: "Mechanical Layouting", startDate: "2026-10-15", endDate: "2026-10-20", state: "done" },
-                    { id: 202, name: "Assembly Sensor Transfer", startDate: "2026-10-21", endDate: "2026-11-05", state: "done" }
+                    { id: 201, name: "Mechanical Layouting", startDate: "2026-09-15", endDate: "2026-09-20", state: "done", progress: 100 },
+                    { id: 202, name: "Assembly Sensor Transfer", startDate: "2026-09-21", endDate: "2026-10-05", state: "done", progress: 100 }
                 ]
             },
             {
                 id: 3,
                 name: "Long Taper 7",
                 location: "Plant 5",
-                startDate: "2026-11-01",
-                endDate: "2026-11-30",
-                status: "", statusColor: "",
-                activities: []
+                startDate: "2026-10-10",
+                endDate: "2026-11-15",
+                status: "Not Started",
+                activities: [
+                    { id: 301, name: "Servo Drive Parameter Setup", startDate: "2026-10-10", endDate: "2026-10-20", state: "not_started", progress: 0 }
+                ]
             }
         ];
 
-        let targetProjectIdForActivity = null;
+        let activeMachineIdForTimeline = 1;
+        let activeProjectForActivity = null;
+        let editingActivityId = null;
         let chartInstance = null;
+        let pendingDeleteId = null;
+        let pendingDeleteType = null; // 'project' or 'activity'
 
         // ==========================================
-        // 2. FUNGSI LOGIKA PERHITUNGAN OTOMATIS
+        // 2. STATUS CALCULATION LOGIC
         // ==========================================
         function calculateProjectStatuses() {
             projectsData.forEach(proj => {
@@ -290,33 +388,27 @@
                 });
 
                 if (total === 0 || (doneCount === 0 && progressCount === 0)) {
-                    // Jika kosong ATAU tidak ada yang done & on progress (berarti semua not_started)
                     proj.status = "Not Started";
-                    proj.statusColor = "bg-red-100 text-red-700 border-red-200";
                 } else if (doneCount === total) {
-                    // Jika semua aktivitas done
                     proj.status = "Finish";
-                    proj.statusColor = "bg-green-100 text-green-700 border-green-200";
                 } else {
-                    // Jika ada campuran
                     proj.status = "On Progress";
-                    proj.statusColor = "bg-yellow-100 text-yellow-700 border-yellow-200";
                 }
             });
         }
 
         // ==========================================
-        // 3. FUNGSI RENDER (DASHBOARD, PROJECT, OUTSTANDING, TIMELINE)
+        // 3. RENDER ALL VIEWS
         // ==========================================
         function renderAll() {
-            calculateProjectStatuses(); // Hitung status dulu
-            
+            calculateProjectStatuses();
             renderDashboard();
             renderProjects();
             renderOutstanding();
             renderTimeline();
         }
 
+        // --- RENDER DASHBOARD ---
         function renderDashboard() {
             let pOnProgress = 0, pNotStarted = 0, pFinish = 0;
             let aTotal = 0, aDone = 0, aProgress = 0, aNotStarted = 0;
@@ -334,348 +426,500 @@
                 });
             });
 
-            // Update DOM Teks
             document.getElementById('dashProjProgress').innerText = pOnProgress;
             document.getElementById('dashProjNotStarted').innerText = pNotStarted;
-            document.getElementById('dashOutstanding').innerText = (aProgress + aNotStarted);
-            document.getElementById('dashDoneTodo').innerText = `${aDone} / ${aProgress + aNotStarted}`;
+            document.getElementById('dashProjDone').innerText = pFinish;
+            document.getElementById('dashOutstandingAct').innerText = (aProgress + aNotStarted);
 
-            // Update Pie Chart Data (Sesuai Permintaan: Done, On Progress, Not Started)
+            // Chart: Statistic Project (Finish, On Progress, Not Started)
             if (chartInstance) {
-                chartInstance.data.datasets[0].data = [aDone, aProgress, aNotStarted];
+                chartInstance.data.datasets[0].data = [pFinish, pOnProgress, pNotStarted];
                 chartInstance.update();
             } else {
-                initChart([aDone, aProgress, aNotStarted]);
+                initChart([pFinish, pOnProgress, pNotStarted]);
             }
+
+            // Render Top 5 Upcoming Deadlines
+            renderUpcomingDeadlines();
         }
 
         function initChart(dataArray) {
             const ctx = document.getElementById('progressChart').getContext('2d');
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
-                data: { 
-                    labels: ['Done', 'On Progress', 'Not Started'], 
-                    datasets: [{ 
-                        data: dataArray, 
-                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444'], // Hijau, Kuning, Merah
-                        borderWidth: 3, borderColor: '#ffffff', hoverOffset: 6 
-                    }] 
+                data: {
+                    labels: ['Finish', 'On Progress', 'Not Started'],
+                    datasets: [{
+                        data: dataArray,
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 2, borderColor: '#0f172a', hoverOffset: 6
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true, font: {family: 'Inter', weight: 'bold'} } } } }
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '70%',
+                    plugins: { legend: { position: 'bottom', labels: { padding: 15, color: '#94a3b8', font: {family: 'Inter', weight: 'bold', size: 11} } } }
+                }
             });
         }
 
+        function renderUpcomingDeadlines() {
+            const reminderContainer = document.getElementById('reminderList');
+            reminderContainer.innerHTML = '';
+
+            let allUpcoming = [];
+            projectsData.forEach(p => {
+                p.activities.forEach(a => {
+                    if (a.state !== 'done') {
+                        allUpcoming.push({
+                            actName: a.name,
+                            projName: p.name,
+                            endDate: a.endDate,
+                            state: a.state,
+                            progress: a.progress || 0
+                        });
+                    }
+                });
+            });
+
+            // Sort by endDate ascending
+            allUpcoming.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+            const top5 = allUpcoming.slice(0, 5);
+
+            if (top5.length === 0) {
+                reminderContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-6 text-center"><i class="fa-solid fa-circle-check text-emerald-400 text-lg mb-1 block"></i>No upcoming activity deadlines!</p>`;
+                return;
+            }
+
+            top5.forEach(item => {
+                let badgeClass = item.state === 'on_progress' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30';
+                let statusBadge = item.state === 'on_progress' ? `On Progress (${item.progress}%)` : `Not Started`;
+
+                reminderContainer.innerHTML += `
+                    <div class="p-3 bg-slate-950 rounded-lg border border-slate-800 flex justify-between items-center hover:border-slate-700 transition-colors">
+                        <div>
+                            <h4 class="text-xs font-bold text-white mb-0.5">${item.actName}</h4>
+                            <p class="text-[10px] text-slate-400"><i class="fa-solid fa-microchip text-cyan-400 mr-1"></i>${item.projName}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${badgeClass} block mb-1">${statusBadge}</span>
+                            <span class="text-[10px] text-slate-400 font-mono"><i class="fa-regular fa-calendar mr-1"></i>Due: ${item.endDate}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- RENDER PROJECT MACHINE ---
         function renderProjects() {
             const container = document.getElementById('projectsContainer');
-            container.innerHTML = ''; 
+            container.innerHTML = '';
 
             projectsData.forEach(proj => {
+                let statusBadge = '';
+                if(proj.status === 'Finish') statusBadge = '<span class="text-xs font-bold px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 uppercase">Finish</span>';
+                else if(proj.status === 'On Progress') statusBadge = '<span class="text-xs font-bold px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 uppercase">On Progress</span>';
+                else statusBadge = '<span class="text-xs font-bold px-2.5 py-1 rounded bg-red-500/10 text-red-400 border border-red-500/30 uppercase">Not Started</span>';
+
                 let activitiesHTML = '';
-                proj.activities.forEach((act, index) => {
-                    // Logic Indikator & Warna (Tanpa Coretan)
-                    let actBg, actBorder, actIcon, actText;
+                proj.activities.forEach(act => {
+                    let actBg, actBorder, actIcon, actBadgeText;
                     if (act.state === 'done') {
-                        actBg = 'bg-green-50'; actBorder = 'border-l-4 border-green-500'; actIcon = '<i class="fa-solid fa-circle-check text-green-500"></i>'; actText = 'text-green-800';
+                        actBg = 'bg-emerald-950/20'; actBorder = 'border-l-4 border-l-emerald-500'; actIcon = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+                        actBadgeText = '<span class="text-[10px] font-bold text-emerald-400">Done</span>';
                     } else if (act.state === 'on_progress') {
-                        actBg = 'bg-yellow-50'; actBorder = 'border-l-4 border-yellow-400'; actIcon = '<i class="fa-solid fa-spinner animate-spin text-yellow-500"></i>'; actText = 'text-yellow-800';
+                        actBg = 'bg-amber-950/20'; actBorder = 'border-l-4 border-l-amber-500'; actIcon = '<i class="fa-solid fa-spinner animate-spin text-amber-400"></i>';
+                        actBadgeText = `<span class="text-[10px] font-bold text-amber-400">On Progress (${act.progress || 0}%)</span>`;
                     } else {
-                        actBg = 'bg-red-50'; actBorder = 'border-l-4 border-red-500'; actIcon = '<i class="fa-solid fa-circle-xmark text-red-500"></i>'; actText = 'text-red-800';
+                        actBg = 'bg-red-950/20'; actBorder = 'border-l-4 border-l-red-500'; actIcon = '<i class="fa-solid fa-circle-pause text-red-400"></i>';
+                        actBadgeText = '<span class="text-[10px] font-bold text-red-400">Not Started</span>';
                     }
-                    
+
                     activitiesHTML += `
-                        <div class="${actBg} ${actBorder} border-y border-r border-gray-200 p-3 rounded-r-lg shadow-sm mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center transition-all">
-                            <div class="mb-2 sm:mb-0 pr-2">
+                        <div class="${actBg} ${actBorder} p-3 rounded-r-lg border-y border-r border-slate-800 mb-2 flex justify-between items-center group">
+                            <div class="pr-2">
                                 <div class="flex items-center space-x-2">
                                     ${actIcon}
-                                    <span class="font-bold text-sm ${actText}">${act.name}</span>
+                                    <span class="font-bold text-xs text-white">${act.name}</span>
+                                </div>
+                                <div class="mt-1 flex items-center space-x-3">
+                                    ${actBadgeText}
+                                    <span class="text-[10px] text-slate-500"><i class="fa-regular fa-calendar mr-1"></i>${act.startDate} to ${act.endDate}</span>
                                 </div>
                             </div>
-                            <div class="w-full sm:w-auto">
-                                <select onchange="updateActivityStatus(${proj.id}, ${act.id}, this.value)" class="w-full sm:w-auto text-xs font-bold p-1.5 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
-                                    <option value="not_started" ${act.state === 'not_started' ? 'selected' : ''}>Not Started</option>
-                                    <option value="on_progress" ${act.state === 'on_progress' ? 'selected' : ''}>On Progress</option>
-                                    <option value="done" ${act.state === 'done' ? 'selected' : ''}>Done</option>
-                                </select>
+                            <div class="flex space-x-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                                <button onclick="openEditActivityModal(${proj.id}, ${act.id})" class="p-1.5 text-slate-400 hover:text-cyan-400 text-xs" title="Edit Activity"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="confirmDeleteActivity(${proj.id}, ${act.id})" class="p-1.5 text-slate-400 hover:text-red-400 text-xs" title="Delete Activity"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
                         </div>
                     `;
                 });
 
-                const cardHTML = `
-                    <div class="bg-white rounded-xl shadow-md border border-gray-200 flex flex-col h-full overflow-hidden hover:shadow-lg transition-shadow">
-                        <div class="bg-slate-50 p-5 border-b border-gray-200 flex justify-between items-start">
+                container.innerHTML += `
+                    <div class="bg-slate-900 rounded-xl border border-slate-800 flex flex-col h-full overflow-hidden hover:border-slate-700 transition-all">
+                        <div class="p-5 border-b border-slate-800 bg-slate-900/60 flex justify-between items-start">
                             <div>
-                                <h3 class="font-black text-xl text-slate-800 mb-1">${proj.name}</h3>
-                                <p class="text-xs font-medium text-slate-500 mb-2"><i class="fa-solid fa-location-dot mr-1"></i>${proj.location} &nbsp;|&nbsp; <i class="fa-regular fa-calendar mr-1"></i>${proj.startDate} s/d ${proj.endDate}</p>
-                                <span class="text-xs font-bold px-3 py-1 border ${proj.statusColor} rounded-full inline-block uppercase tracking-wide">${proj.status}</span>
+                                <h3 class="font-bold text-lg text-white mb-1">${proj.name}</h3>
+                                <p class="text-xs text-slate-400 mb-2"><i class="fa-solid fa-location-dot mr-1 text-cyan-400"></i>${proj.location} &nbsp;|&nbsp; <i class="fa-regular fa-calendar mr-1"></i>${proj.startDate} - ${proj.endDate}</p>
+                                ${statusBadge}
                             </div>
-                            <div class="space-x-1 flex-shrink-0">
-                                <button onclick="hapusProjectConfirm(${proj.id})" class="h-8 w-8 rounded bg-white border border-gray-200 text-gray-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-all shadow-sm" title="Delete Project"><i class="fa-solid fa-trash-can"></i></button>
-                            </div>
+                            <button onclick="confirmDeleteProject(${proj.id})" class="text-slate-500 hover:text-red-400 text-sm p-1.5" title="Delete Machine"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
-                        <div class="p-5 flex-1 bg-white">
-                            ${activitiesHTML.length > 0 ? activitiesHTML : '<p class="text-sm text-gray-400 italic text-center py-4">Belum ada aktivitas.</p>'}
+                        <div class="p-5 flex-1 bg-slate-950/40">
+                            ${activitiesHTML || '<p class="text-xs text-slate-500 italic text-center py-4">No activity created yet.</p>'}
                         </div>
-                        <div class="p-4 bg-gray-50 border-t border-gray-100">
-                            <button onclick="bukaModalTambahActivity(${proj.id})" class="w-full text-sm font-bold text-purple-600 hover:text-white bg-purple-50 hover:bg-purple-600 border border-purple-200 py-2.5 rounded-lg transition-all shadow-sm flex items-center justify-center">
-                                <i class="fa-solid fa-plus mr-2"></i> Tambah Activity
+                        <div class="p-4 bg-slate-900 border-t border-slate-800">
+                            <button onclick="openAddActivityModal(${proj.id})" class="w-full text-xs font-bold text-purple-400 hover:text-white bg-purple-500/10 hover:bg-purple-600 border border-purple-500/30 py-2.5 rounded-lg transition-all flex items-center justify-center">
+                                <i class="fa-solid fa-plus mr-1.5"></i> Add Activity
                             </button>
                         </div>
                     </div>
                 `;
-                container.innerHTML += cardHTML;
             });
         }
 
+        // --- RENDER OUTSTANDING PROJECT ---
         function renderOutstanding() {
-            const tableBody = document.getElementById('outstandingTableBody');
-            tableBody.innerHTML = '';
-            let no = 1;
-
-            projectsData.forEach(proj => {
-                proj.activities.forEach(act => {
-                    if (act.state !== 'done') { // Not started atau On progress
-                        let badgeColor = act.state === 'on_progress' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' : 'bg-red-100 text-red-800 border border-red-200';
-                        let statusText = act.state === 'on_progress' ? 'On Progress' : 'Not Started';
-
-                        tableBody.innerHTML += `
-                            <tr class="hover:bg-blue-50 transition-colors">
-                                <td class="p-4 font-bold text-center">${no++}</td>
-                                <td class="p-4 font-bold text-slate-800">${act.name}</td>
-                                <td class="p-4 font-medium text-slate-600"><span class="bg-gray-100 px-2 py-1 rounded text-xs border border-gray-200">${proj.name}</span></td>
-                                <td class="p-4 text-xs font-medium text-slate-500">${act.startDate} <br>s/d<br> ${act.endDate}</td>
-                                <td class="p-4"><span class="px-3 py-1.5 rounded-md text-xs font-bold ${badgeColor} uppercase tracking-wide shadow-sm">${statusText}</span></td>
-                            </tr>
-                        `;
-                    }
-                });
-            });
-
-            if (no === 1) {
-                tableBody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400 italic font-medium"><i class="fa-solid fa-check-double text-4xl mb-3 text-green-300 block"></i> Semua tugas sudah selesai! Tidak ada outstanding.</td></tr>`;
-            }
-        }
-
-        function renderTimeline() {
-            const container = document.getElementById('timelineContainer');
+            const container = document.getElementById('outstandingContainer');
             container.innerHTML = '';
 
+            let hasOutstanding = false;
+
             projectsData.forEach(proj => {
-                let pStart = new Date(proj.startDate).getTime();
-                let pEnd = new Date(proj.endDate).getTime();
-                let pDuration = pEnd - pStart;
-                if(pDuration <= 0) pDuration = 86400000; // Minimal 1 hari jika input sama
+                // Filter non-done activities
+                let outstandingActs = proj.activities.filter(a => a.state !== 'done');
+                if (outstandingActs.length > 0) {
+                    hasOutstanding = true;
+                    // Sort by deadline (endDate ascending)
+                    outstandingActs.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
 
-                let actsHtml = proj.activities.map(act => {
-                    let aStart = new Date(act.startDate).getTime();
-                    let aEnd = new Date(act.endDate).getTime();
-                    
-                    let leftPct = ((aStart - pStart) / pDuration) * 100;
-                    let widthPct = ((aEnd - aStart) / pDuration) * 100;
-                    
-                    // Clamping agar chart tidak bocor ke luar kotak
-                    if (leftPct < 0) leftPct = 0;
-                    if (leftPct > 100) leftPct = 100;
-                    if (leftPct + widthPct > 100) widthPct = 100 - leftPct;
-                    if (widthPct <= 0) widthPct = 2; 
+                    let rowsHTML = '';
+                    outstandingActs.forEach((act, idx) => {
+                        let statusBadge = act.state === 'on_progress' 
+                            ? `<span class="px-2.5 py-1 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 uppercase">On Progress (${act.progress || 0}%)</span>`
+                            : `<span class="px-2.5 py-1 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/30 uppercase">Not Started</span>`;
 
-                    let barColor = act.state === 'done' ? 'bg-green-500' : (act.state === 'on_progress' ? 'bg-yellow-400' : 'bg-red-500');
+                        rowsHTML += `
+                            <tr class="hover:bg-slate-800/40 border-b border-slate-800/60 text-xs">
+                                <td class="p-3.5 text-center font-bold text-slate-400">${idx + 1}</td>
+                                <td class="p-3.5 font-bold text-white">${act.name}</td>
+                                <td class="p-3.5 text-slate-300"><span class="bg-slate-800 px-2 py-0.5 rounded border border-slate-700 text-[11px]"><i class="fa-solid fa-microchip text-cyan-400 mr-1"></i>${proj.name}</span></td>
+                                <td class="p-3.5 text-slate-400 font-mono">${act.endDate}</td>
+                                <td class="p-3.5">${statusBadge}</td>
+                            </tr>
+                        `;
+                    });
 
-                    return `
-                        <div class="mb-4">
-                            <div class="flex justify-between text-xs font-bold text-gray-600 mb-1 px-1">
-                                <span>${act.name}</span>
-                                <span class="text-gray-400 font-medium">${act.startDate} to ${act.endDate}</span>
+                    container.innerHTML += `
+                        <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+                            <div class="p-4 bg-slate-900/80 border-b border-slate-800 flex justify-between items-center">
+                                <h3 class="font-bold text-sm text-cyan-400 flex items-center"><i class="fa-solid fa-industry mr-2"></i>${proj.name}</h3>
+                                <span class="text-xs text-slate-400 font-medium">${outstandingActs.length} pending task(s)</span>
                             </div>
-                            <div class="relative h-6 bg-slate-100 rounded-md w-full overflow-hidden border border-slate-200">
-                                <div class="absolute h-full rounded-md shadow-sm flex items-center px-2 text-[10px] text-white font-bold whitespace-nowrap overflow-hidden transition-all ${barColor}" 
-                                     style="left: ${leftPct}%; width: ${widthPct}%; min-width: 2rem;">
-                                </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-950 text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-800">
+                                            <th class="p-3.5 w-12 text-center">No</th>
+                                            <th class="p-3.5">Activity</th>
+                                            <th class="p-3.5">Project Machine</th>
+                                            <th class="p-3.5">Due Date</th>
+                                            <th class="p-3.5">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${rowsHTML}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     `;
-                }).join('');
+                }
+            });
 
-                container.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-4">
-                        <div onclick="toggleTimeline('tl-${proj.id}')" class="p-5 bg-slate-50 border-b border-gray-200 flex justify-between items-center cursor-pointer hover:bg-blue-50 transition-colors">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mr-4 shadow-inner">
-                                    <i class="fa-solid fa-gears text-lg"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-black text-slate-800 text-lg">${proj.name}</h3>
-                                    <p class="text-xs font-bold text-slate-500">Project Timeline: <span class="text-blue-600">${proj.startDate}</span> s/d <span class="text-blue-600">${proj.endDate}</span></p>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-chevron-down text-gray-400 bg-white p-2 rounded-full border border-gray-200 shadow-sm"></i>
+            if (!hasOutstanding) {
+                container.innerHTML = `<div class="bg-slate-900 rounded-xl p-12 border border-slate-800 text-center"><i class="fa-solid fa-circle-check text-5xl text-emerald-400 mb-3 block"></i><p class="text-slate-300 font-bold">All activities are completed! No outstanding tasks.</p></div>`;
+            }
+        }
+
+        // --- RENDER TIMELINE PROJECT (CALENDAR VIEW) ---
+        function renderTimeline() {
+            const tabsContainer = document.getElementById('machineTabs');
+            tabsContainer.innerHTML = '';
+
+            if (projectsData.length === 0) return;
+
+            // Ensure active machine ID exists
+            if (!projectsData.some(p => p.id === activeMachineIdForTimeline)) {
+                activeMachineIdForTimeline = projectsData[0].id;
+            }
+
+            projectsData.forEach(proj => {
+                let activeStyle = proj.id === activeMachineIdForTimeline 
+                    ? 'bg-cyan-600 text-white border-cyan-400 shadow-lg shadow-cyan-600/30' 
+                    : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-white';
+
+                tabsContainer.innerHTML += `
+                    <button onclick="selectMachineTimeline(${proj.id})" class="p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${activeStyle}">
+                        <div class="flex justify-between items-center mb-2">
+                            <i class="fa-solid fa-microchip text-base"></i>
+                            <span class="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-slate-950/40">${proj.activities.length} Acts</span>
                         </div>
-                        <div id="tl-${proj.id}" class="hidden p-6 bg-white gantt-scroll overflow-x-auto">
-                            ${actsHtml || '<p class="text-sm text-gray-400 italic text-center py-4">Belum ada aktivitas untuk dijadwalkan.</p>'}
+                        <span class="text-xs font-bold truncate">${proj.name}</span>
+                    </button>
+                `;
+            });
+
+            // Render Selected Machine Calendar
+            const selectedProj = projectsData.find(p => p.id === activeMachineIdForTimeline);
+            if (!selectedProj) return;
+
+            document.getElementById('selectedMachineTitle').innerText = selectedProj.name;
+            document.getElementById('selectedMachineDates').innerText = `Schedule Period: ${selectedProj.startDate} to ${selectedProj.endDate}`;
+
+            const calendarBody = document.getElementById('calendarBody');
+            
+            // Build Days Grid (1 to 31 Days Calendar Header)
+            let daysHeaderHTML = '';
+            for (let day = 1; day <= 31; day++) {
+                daysHeaderHTML += `<div class="w-8 flex-shrink-0 text-center text-[10px] font-bold text-slate-500 border-r border-slate-800/50">${day}</div>`;
+            }
+
+            let actsScheduleHTML = '';
+            selectedProj.activities.forEach(act => {
+                let startDay = parseInt(act.startDate.split('-')[2]) || 1;
+                let endDay = parseInt(act.endDate.split('-')[2]) || 31;
+                if (endDay < startDay) endDay = startDay;
+
+                let barColor = act.state === 'done' ? 'bg-emerald-500' : (act.state === 'on_progress' ? 'bg-amber-500' : 'bg-red-500');
+
+                // Render 31 Grid cells for each activity
+                let cellsHTML = '';
+                for (let d = 1; d <= 31; d++) {
+                    let isInRange = d >= startDay && d <= endDay;
+                    let barStyle = isInRange ? `${barColor} border border-white/20 shadow-sm` : '';
+                    cellsHTML += `
+                        <div class="w-8 h-7 flex-shrink-0 border-r border-slate-800/40 p-1 flex items-center justify-center">
+                            ${isInRange ? `<div class="w-full h-full rounded-sm ${barStyle}" title="${act.name} (${act.startDate} to${act.endDate})"></div>` : ''}
+                        </div>
+                    `;
+                }
+
+                actsScheduleHTML += `
+                    <div class="flex items-center border-b border-slate-800/60 hover:bg-slate-800/30 transition-colors">
+                        <div class="w-64 flex-shrink-0 p-3 pr-4 border-r border-slate-800">
+                            <p class="text-xs font-bold text-white truncate">${act.name}</p>
+                            <p class="text-[10px] text-slate-500">${act.startDate} to ${act.endDate}</p>
+                        </div>
+                        <div class="flex flex-1">
+                            ${cellsHTML}
                         </div>
                     </div>
                 `;
             });
+
+            calendarBody.innerHTML = `
+                <div class="min-w-[1100px]">
+                    <div class="flex items-center bg-slate-950 border-b border-slate-800 py-2.5">
+                        <div class="w-64 flex-shrink-0 px-3 text-xs font-bold text-slate-400 uppercase tracking-wider border-r border-slate-800">Activity Name</div>
+                        <div class="flex flex-1">
+                            ${daysHeaderHTML}
+                        </div>
+                    </div>
+                    <div>
+                        ${actsScheduleHTML || '<p class="text-xs text-slate-500 italic p-6 text-center">No activities scheduled for this machine.</p>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectMachineTimeline(projId) {
+            activeMachineIdForTimeline = projId;
+            renderTimeline();
         }
 
         // ==========================================
-        // 4. LOGIKA CRUD & EVENT HANDLERS
+        // 4. CRUD HANDLERS
         // ==========================================
-        
-        function updateActivityStatus(projId, actId, newStatus) {
-            const project = projectsData.find(p => p.id === projId);
-            const activity = project.activities.find(a => a.id === actId);
-            activity.state = newStatus;
-            renderAll();
-        }
-
-        function bukaModalTambahProject() {
-            // Set default date ke hari ini
+        function openAddProjectModal() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('newProjectStart').value = today;
             document.getElementById('newProjectEnd').value = today;
             toggleModal('addProjectModal');
         }
 
-        function simpanProjectBaru() {
+        function saveNewProject() {
             const name = document.getElementById('newProjectName').value;
             const loc = document.getElementById('newProjectLocation').value;
             const start = document.getElementById('newProjectStart').value;
             const end = document.getElementById('newProjectEnd').value;
-            
-            if (!name || !start || !end) {
-                tampilkanAlert("Nama Project, Tanggal Start, dan Tanggal End wajib diisi!");
-                return;
-            }
 
-            if(new Date(start) > new Date(end)) {
-                tampilkanAlert("Tanggal Start tidak boleh lebih besar dari Tanggal End!");
+            if (!name || !start || !end) {
+                showAlert("Please fill in Project Name, Start Date, and End Date!");
                 return;
             }
 
             projectsData.push({
                 id: Date.now(),
                 name: name,
-                location: loc || "-",
+                location: loc || "Main Line",
                 startDate: start,
                 endDate: end,
-                status: "Not Started", // Akan di-recalc
-                statusColor: "",
+                status: "Not Started",
                 activities: []
             });
 
             renderAll();
             toggleModal('addProjectModal');
-            
-            // Clear input
             document.getElementById('newProjectName').value = "";
             document.getElementById('newProjectLocation').value = "";
         }
 
-        function hapusProjectConfirm(id) {
-            targetProjectIdForActivity = id; // Pinjam variabel untuk ID Hapus
-            const modal = document.getElementById('customConfirmModal');
-            document.getElementById('confirmMessage').innerText = "Semua aktivitas di dalam project ini juga akan terhapus.";
-            modal.classList.remove('hidden');
+        function confirmDeleteProject(id) {
+            pendingDeleteId = id;
+            pendingDeleteType = 'project';
+            document.getElementById('confirmMessage').innerText = "Delete this machine project and all its activities?";
+            document.getElementById('customConfirmModal').classList.remove('hidden');
         }
 
-        function bukaModalTambahActivity(projId) {
-            targetProjectIdForActivity = projId;
+        function openAddActivityModal(projId) {
+            activeProjectForActivity = projId;
+            editingActivityId = null;
+            document.getElementById('actModalTitle').innerHTML = '<i class="fa-solid fa-list-check text-purple-400 mr-2"></i>Add Activity';
+            
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('newActStart').value = today;
-            document.getElementById('newActEnd').value = today;
-            document.getElementById('newActDesc').value = "";
-            toggleModal('addActivityModal');
+            document.getElementById('actDesc').value = "";
+            document.getElementById('actStart').value = today;
+            document.getElementById('actEnd').value = today;
+            document.getElementById('actStatusSelect').value = "not_started";
+            document.getElementById('actProgressInput').value = 50;
+            toggleProgressInput();
+
+            toggleModal('activityModal');
         }
 
-        function simpanAktivitasBaru() {
-            const desc = document.getElementById('newActDesc').value;
-            const start = document.getElementById('newActStart').value;
-            const end = document.getElementById('newActEnd').value;
+        function openEditActivityModal(projId, actId) {
+            activeProjectForActivity = projId;
+            editingActivityId = actId;
+            document.getElementById('actModalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-purple-400 mr-2"></i>Edit Activity';
+
+            const proj = projectsData.find(p => p.id === projId);
+            const act = proj.activities.find(a => a.id === actId);
+
+            document.getElementById('actDesc').value = act.name;
+            document.getElementById('actStart').value = act.startDate;
+            document.getElementById('actEnd').value = act.endDate;
+            document.getElementById('actStatusSelect').value = act.state;
+            document.getElementById('actProgressInput').value = act.progress || 50;
+            toggleProgressInput();
+
+            toggleModal('activityModal');
+        }
+
+        function toggleProgressInput() {
+            const status = document.getElementById('actStatusSelect').value;
+            const container = document.getElementById('progressInputContainer');
+            if (status === 'on_progress') container.classList.remove('hidden');
+            else container.classList.add('hidden');
+        }
+
+        function saveActivity() {
+            const desc = document.getElementById('actDesc').value;
+            const start = document.getElementById('actStart').value;
+            const end = document.getElementById('actEnd').value;
+            const status = document.getElementById('actStatusSelect').value;
+            const progress = parseInt(document.getElementById('actProgressInput').value) || 0;
 
             if (!desc || !start || !end) {
-                tampilkanAlert("Deskripsi dan Tanggal wajib diisi!");
+                showAlert("Please fill in Activity Description and Dates!");
                 return;
             }
 
-            if(new Date(start) > new Date(end)) {
-                tampilkanAlert("Tanggal Start tidak boleh lebih besar dari Tanggal End!");
-                return;
-            }
+            const proj = projectsData.find(p => p.id === activeProjectForActivity);
 
-            const project = projectsData.find(p => p.id === targetProjectIdForActivity);
-            project.activities.push({
-                id: Date.now(),
-                name: desc,
-                startDate: start,
-                endDate: end,
-                state: "not_started"
-            });
+            if (editingActivityId) {
+                // Edit mode
+                const act = proj.activities.find(a => a.id === editingActivityId);
+                act.name = desc;
+                act.startDate = start;
+                act.endDate = end;
+                act.state = status;
+                act.progress = status === 'done' ? 100 : (status === 'not_started' ? 0 : progress);
+            } else {
+                // Add mode
+                proj.activities.push({
+                    id: Date.now(),
+                    name: desc,
+                    startDate: start,
+                    endDate: end,
+                    state: status,
+                    progress: status === 'done' ? 100 : (status === 'not_started' ? 0 : progress)
+                });
+            }
 
             renderAll();
-            toggleModal('addActivityModal');
+            toggleModal('activityModal');
         }
 
-        // ==========================================
-        // 5. UTILITAS MODAL CUSTOM & UI NAVIGATION
-        // ==========================================
-        function tampilkanAlert(pesan) {
-            document.getElementById('alertMessage').innerText = pesan;
+        function confirmDeleteActivity(projId, actId) {
+            activeProjectForActivity = projId;
+            pendingDeleteId = actId;
+            pendingDeleteType = 'activity';
+            document.getElementById('confirmMessage').innerText = "Are you sure you want to delete this activity?";
+            document.getElementById('customConfirmModal').classList.remove('hidden');
+        }
+
+        function closeConfirm(isConfirmed) {
+            document.getElementById('customConfirmModal').classList.add('hidden');
+            if (isConfirmed && pendingDeleteId) {
+                if (pendingDeleteType === 'project') {
+                    projectsData = projectsData.filter(p => p.id !== pendingDeleteId);
+                } else if (pendingDeleteType === 'activity') {
+                    const proj = projectsData.find(p => p.id === activeProjectForActivity);
+                    proj.activities = proj.activities.filter(a => a.id !== pendingDeleteId);
+                }
+                renderAll();
+            }
+            pendingDeleteId = null;
+            pendingDeleteType = null;
+        }
+
+        function showAlert(msg) {
+            document.getElementById('alertMessage').innerText = msg;
             document.getElementById('customAlertModal').classList.remove('hidden');
         }
         function closeAlert() { document.getElementById('customAlertModal').classList.add('hidden'); }
 
-        function closeConfirm(isConfirmed) {
-            document.getElementById('customConfirmModal').classList.add('hidden');
-            if(isConfirmed && targetProjectIdForActivity !== null) {
-                projectsData = projectsData.filter(proj => proj.id !== targetProjectIdForActivity);
-                targetProjectIdForActivity = null;
-                renderAll();
-            }
-        }
+        function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
 
-        function toggleModal(modalID){
-            const modal = document.getElementById(modalID);
-            modal.classList.toggle('hidden');
-        }
-
-        function toggleTimeline(id) {
-            const el = document.getElementById(id);
-            el.classList.toggle('hidden');
-        }
-
+        // --- NAVIGATION HANDLERS ---
         const sidebar = document.getElementById('sidebar');
         document.getElementById('toggleSidebar').addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full'); sidebar.classList.toggle('translate-x-0');
+            sidebar.classList.toggle('-translate-x-full');
         });
         document.getElementById('closeSidebar').addEventListener('click', () => {
-            sidebar.classList.add('-translate-x-full'); sidebar.classList.remove('translate-x-0');
+            sidebar.classList.add('-translate-x-full');
         });
 
         if (window.innerWidth < 768) { sidebar.classList.add('-translate-x-full'); }
 
         function switchView(viewId, titleText) {
-            document.querySelectorAll('.view-section').forEach(section => section.classList.remove('active'));
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('bg-slate-700');
-                // mereset warna icon jika tidak aktif
-                const icon = item.querySelector('i');
-                icon.classList.remove('text-white');
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => {
+                m.classList.remove('bg-slate-800', 'text-white', 'border', 'border-slate-700');
+                m.classList.add('text-slate-300');
             });
 
             document.getElementById(viewId).classList.add('active');
             document.getElementById('headerTitle').innerText = titleText;
-            
-            const activeMenu = document.getElementById('menu-' + viewId);
-            activeMenu.classList.add('bg-slate-700');
-            activeMenu.querySelector('i').classList.add('text-white');
 
-            if (window.innerWidth < 768) { sidebar.classList.add('-translate-x-full'); sidebar.classList.remove('translate-x-0'); }
+            const activeNav = document.getElementById('menu-' + viewId);
+            activeNav.classList.add('bg-slate-800', 'text-white', 'border', 'border-slate-700');
+
+            if (window.innerWidth < 768) { sidebar.classList.add('-translate-x-full'); }
         }
 
-        // Jalankan saat load
+        // Initialize application
         renderAll();
-
     </script>
 </body>
 </html>
