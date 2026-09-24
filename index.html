@@ -12,43 +12,113 @@
         .view-section { display: none; }
         .view-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .timeline-content { transition: max-height 0.3s ease-out, padding 0.3s ease; max-height: 0; overflow: hidden; }
-        .timeline-content.open { max-height: 500px; padding-top: 1rem; padding-bottom: 1rem; }
+        /* Custom scrollbar untuk gantt chart */
+        .gantt-scroll::-webkit-scrollbar { height: 8px; }
+        .gantt-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body class="bg-gray-100 flex h-screen overflow-hidden font-sans text-gray-800 relative">
 
-    <!-- Modal Tambah Project -->
-    <div id="addProjectModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-50 hidden flex items-center justify-center transition-opacity">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                <h3 class="text-lg font-bold text-gray-800">Tambah Project Baru</h3>
+    <!-- ================= MODALS (POP-UPS MODERN) ================= -->
+
+    <!-- 1. Modal Alert Kustom -->
+    <div id="customAlertModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-[70] hidden flex items-center justify-center transition-opacity backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform transition-all text-center p-6">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <i class="fa-solid fa-triangle-exclamation text-red-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg leading-6 font-bold text-gray-900 mb-2">Peringatan</h3>
+            <p id="alertMessage" class="text-sm text-gray-500 mb-6">Pesan peringatan di sini.</p>
+            <button onclick="closeAlert()" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm transition-colors">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. Modal Confirm Kustom -->
+    <div id="customConfirmModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-[70] hidden flex items-center justify-center transition-opacity backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform transition-all text-center p-6">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 mb-4">
+                <i class="fa-solid fa-trash-can text-orange-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg leading-6 font-bold text-gray-900 mb-2">Konfirmasi Hapus</h3>
+            <p id="confirmMessage" class="text-sm text-gray-500 mb-6">Apakah Anda yakin?</p>
+            <div class="flex space-x-3">
+                <button onclick="closeConfirm(false)" class="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:text-sm transition-colors">Batal</button>
+                <button onclick="closeConfirm(true)" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 sm:text-sm transition-colors">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Modal Tambah Project -->
+    <div id="addProjectModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-50 hidden flex items-center justify-center transition-opacity backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
+                <h3 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-folder-plus text-blue-600 mr-2"></i>Tambah Project Baru</h3>
                 <button onclick="toggleModal('addProjectModal')" class="text-gray-400 hover:text-red-500 transition-colors">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
             <div class="p-6 space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Project</label>
-                    <input id="newProjectName" type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Contoh: Long Taper 7">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Project *</label>
+                    <input id="newProjectName" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-gray-50" placeholder="Contoh: Auto Packing Machine">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Lokasi Project</label>
-                    <input id="newProjectLocation" type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Contoh: Plant 5">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Lokasi Project</label>
+                    <input id="newProjectLocation" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-gray-50" placeholder="Contoh: Line Produksi A">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Activity Project (Awal)</label>
-                    <input id="newProjectActivity" type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="Contoh: New Line Machine">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tgl Start *</label>
+                        <input id="newProjectStart" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-blue-500 bg-gray-50">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tgl End *</label>
+                        <input id="newProjectEnd" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-blue-500 bg-gray-50">
+                    </div>
                 </div>
             </div>
-            <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
-                <button onclick="toggleModal('addProjectModal')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors text-sm font-medium">Batal</button>
-                <button onclick="simpanProjectBaru()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm font-medium"><i class="fa-solid fa-save mr-1"></i> Simpan Project</button>
+            <div class="px-6 py-4 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50">
+                <button onclick="toggleModal('addProjectModal')" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-bold shadow-sm">Batal</button>
+                <button onclick="simpanProjectBaru()" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-bold shadow-sm"><i class="fa-solid fa-save mr-1"></i> Simpan Project</button>
             </div>
         </div>
     </div>
 
-    <!-- Sidebar -->
+    <!-- 4. Modal Tambah Activity -->
+    <div id="addActivityModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-50 hidden flex items-center justify-center transition-opacity backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
+                <h3 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-clipboard-list text-purple-600 mr-2"></i>Tambah Aktivitas Baru</h3>
+                <button onclick="toggleModal('addActivityModal')" class="text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Deskripsi Aktivitas *</label>
+                    <input id="newActDesc" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 bg-gray-50" placeholder="Contoh: Wiring Sensor">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tgl Start *</label>
+                        <input id="newActStart" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-purple-500 bg-gray-50">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tgl End *</label>
+                        <input id="newActEnd" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-purple-500 bg-gray-50">
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50">
+                <button onclick="toggleModal('addActivityModal')" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-bold shadow-sm">Batal</button>
+                <button onclick="simpanAktivitasBaru()" class="px-5 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-bold shadow-sm"><i class="fa-solid fa-plus mr-1"></i> Simpan Aktivitas</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= SIDEBAR & LAYOUT ================= -->
     <aside id="sidebar" class="bg-slate-800 text-white w-64 flex-shrink-0 transition-sidebar h-full absolute md:relative z-40">
         <div class="p-4 flex justify-between items-center border-b border-slate-700">
             <h2 class="text-xl font-bold tracking-wider"><i class="fa-solid fa-industry mr-2"></i> ENG TEAM</h2>
@@ -60,106 +130,101 @@
             <div>
                 <div class="text-gray-400 uppercase text-xs font-semibold mb-3">Menu Utama</div>
                 <ul class="space-y-2 text-sm">
-                    <li onclick="switchView('dashboardView', 'Dashboard Monitoring')" id="menu-dashboardView" class="menu-item hover:bg-slate-700 p-2 rounded cursor-pointer transition-colors flex items-center bg-slate-700">
-                        <i class="fa-solid fa-chart-pie mr-3 text-white"></i> Dashboard
+                    <li onclick="switchView('dashboardView', 'Dashboard Monitoring')" id="menu-dashboardView" class="menu-item hover:bg-slate-700 p-2 rounded-lg cursor-pointer transition-colors flex items-center bg-slate-700 font-medium">
+                        <i class="fa-solid fa-chart-pie w-6 text-center mr-2 text-white"></i> Dashboard
                     </li>
-                    <li onclick="switchView('projectView', 'Project Machine')" id="menu-projectView" class="menu-item hover:bg-slate-700 p-2 rounded cursor-pointer transition-colors flex items-center">
-                        <i class="fa-solid fa-gears mr-3 text-blue-400"></i> Project Machine
+                    <li onclick="switchView('projectView', 'Project Machine')" id="menu-projectView" class="menu-item hover:bg-slate-700 p-2 rounded-lg cursor-pointer transition-colors flex items-center font-medium">
+                        <i class="fa-solid fa-gears w-6 text-center mr-2 text-blue-400"></i> Project Machine
                     </li>
                 </ul>
             </div>
             <div>
                 <div class="text-gray-400 uppercase text-xs font-semibold mb-3">Manajemen Tugas</div>
                 <ul class="space-y-2 text-sm">
-                    <li onclick="switchView('outstandingView', 'Outstanding Project')" id="menu-outstandingView" class="menu-item hover:bg-slate-700 p-2 rounded cursor-pointer transition-colors flex items-center">
-                        <i class="fa-solid fa-triangle-exclamation mr-3 text-red-400"></i> Outstanding Project
+                    <li onclick="switchView('outstandingView', 'Outstanding Project')" id="menu-outstandingView" class="menu-item hover:bg-slate-700 p-2 rounded-lg cursor-pointer transition-colors flex items-center font-medium">
+                        <i class="fa-solid fa-triangle-exclamation w-6 text-center mr-2 text-red-400"></i> Outstanding Project
                     </li>
-                    <li onclick="switchView('timelineView', 'Timeline Project')" id="menu-timelineView" class="menu-item hover:bg-slate-700 p-2 rounded cursor-pointer transition-colors flex items-center">
-                        <i class="fa-solid fa-calendar-days mr-3 text-purple-400"></i> Timeline Project
+                    <li onclick="switchView('timelineView', 'Timeline Project')" id="menu-timelineView" class="menu-item hover:bg-slate-700 p-2 rounded-lg cursor-pointer transition-colors flex items-center font-medium">
+                        <i class="fa-solid fa-calendar-days w-6 text-center mr-2 text-purple-400"></i> Timeline Project
                     </li>
                 </ul>
             </div>
         </nav>
     </aside>
 
-    <!-- Konten Utama -->
     <div class="flex-1 flex flex-col h-full w-full relative">
-        <!-- Navbar -->
         <header class="bg-white shadow-sm flex items-center justify-between p-4 z-10 border-b border-gray-200">
             <div class="flex items-center">
                 <button id="toggleSidebar" class="text-gray-600 hover:text-blue-600 focus:outline-none mr-4 transition-colors">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
-                <h1 id="headerTitle" class="text-xl font-semibold text-gray-800">Dashboard Monitoring</h1>
+                <h1 id="headerTitle" class="text-xl font-bold text-gray-800">Dashboard Monitoring</h1>
             </div>
             <div class="flex items-center">
                 <div class="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold shadow-md cursor-pointer hover:bg-blue-700 transition-colors">
-                    <i class="fa-solid fa-users-gear"></i>
+                    <i class="fa-solid fa-user-astronaut"></i>
                 </div>
             </div>
         </header>
 
-        <!-- Area Halaman -->
-        <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+        <main class="flex-1 overflow-y-auto p-6 bg-gray-50/50">
             
             <!-- VIEW 1: DASHBOARD -->
             <div id="dashboardView" class="view-section active">
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 border-l-4 border-l-blue-500"><div class="flex items-center"><div class="p-3 rounded-full bg-blue-50 text-blue-500 mr-4"><i class="fa-solid fa-rocket text-xl"></i></div><div><p class="mb-1 text-sm font-medium text-gray-500">Project Berjalan</p><p class="text-2xl font-bold text-gray-800" id="countBerjalan">3</p></div></div></div>
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 border-l-4 border-l-green-500"><div class="flex items-center"><div class="p-3 rounded-full bg-green-50 text-green-500 mr-4"><i class="fa-solid fa-hammer text-xl"></i></div><div><p class="mb-1 text-sm font-medium text-gray-500">Pekerjaan Dilakukan</p><p class="text-2xl font-bold text-gray-800">12</p></div></div></div>
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 border-l-4 border-l-red-500"><div class="flex items-center"><div class="p-3 rounded-full bg-red-50 text-red-500 mr-4"><i class="fa-solid fa-clipboard-list text-xl"></i></div><div><p class="mb-1 text-sm font-medium text-gray-500">Outstanding Pekerjaan</p><p class="text-2xl font-bold text-gray-800" id="countOutstanding">0</p></div></div></div>
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 border-l-4 border-l-purple-500"><div class="flex items-center"><div class="p-3 rounded-full bg-purple-50 text-purple-500 mr-4"><i class="fa-solid fa-scale-balanced text-xl"></i></div><div><p class="mb-1 text-sm font-medium text-gray-500">Done vs To Do</p><p class="text-2xl font-bold text-gray-800">8 / 17</p></div></div></div>
+                    <!-- Link to Project On Progress -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 border-l-4 border-l-yellow-500 transform hover:-translate-y-1 transition-all"><div class="flex items-center"><div class="p-3 rounded-full bg-yellow-50 text-yellow-500 mr-4"><i class="fa-solid fa-spinner animate-spin-slow text-xl"></i></div><div><p class="mb-1 text-sm font-bold text-gray-500 uppercase tracking-wide">Project On Progress</p><p class="text-3xl font-black text-gray-800" id="dashProjProgress">0</p></div></div></div>
+                    <!-- Link to Project Not Started -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 border-l-4 border-l-red-500 transform hover:-translate-y-1 transition-all"><div class="flex items-center"><div class="p-3 rounded-full bg-red-50 text-red-500 mr-4"><i class="fa-solid fa-box-open text-xl"></i></div><div><p class="mb-1 text-sm font-bold text-gray-500 uppercase tracking-wide">Project Not Started</p><p class="text-3xl font-black text-gray-800" id="dashProjNotStarted">0</p></div></div></div>
+                    <!-- Link to Outstanding Activities -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 border-l-4 border-l-orange-500 transform hover:-translate-y-1 transition-all"><div class="flex items-center"><div class="p-3 rounded-full bg-orange-50 text-orange-500 mr-4"><i class="fa-solid fa-clipboard-list text-xl"></i></div><div><p class="mb-1 text-sm font-bold text-gray-500 uppercase tracking-wide">Outstanding Pkrjaan</p><p class="text-3xl font-black text-gray-800" id="dashOutstanding">0</p></div></div></div>
+                    <!-- Link to Done vs Todo -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 border-l-4 border-l-green-500 transform hover:-translate-y-1 transition-all"><div class="flex items-center"><div class="p-3 rounded-full bg-green-50 text-green-500 mr-4"><i class="fa-solid fa-scale-balanced text-xl"></i></div><div><p class="mb-1 text-sm font-bold text-gray-500 uppercase tracking-wide">Done vs To Do (Act)</p><p class="text-3xl font-black text-gray-800" id="dashDoneTodo">0 / 0</p></div></div></div>
                 </div>
-                <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 w-full max-w-lg mx-auto md:mx-0">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-6 text-center md:text-left">Progress All Project</h3>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 w-full max-w-lg mx-auto md:mx-0">
+                    <h3 class="text-lg font-bold text-gray-700 mb-6 text-center md:text-left">Statistik Aktivitas Project</h3>
                     <div class="relative h-64 w-full flex justify-center"><canvas id="progressChart"></canvas></div>
                 </div>
             </div>
 
-            <!-- VIEW 2: PROJECT MACHINE (Kanban) -->
+            <!-- VIEW 2: PROJECT MACHINE -->
             <div id="projectView" class="view-section">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Daftar Project Mesin</h2>
-                    <button onclick="toggleModal('addProjectModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition-colors text-sm font-medium">
-                        <i class="fa-solid fa-plus mr-1"></i> Tambah Project
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+                    <h2 class="text-2xl font-black text-gray-800 tracking-tight">Daftar Project Mesin</h2>
+                    <button onclick="bukaModalTambahProject()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg shadow-md transition-all transform hover:scale-105 text-sm font-bold">
+                        <i class="fa-solid fa-plus mr-2"></i> Tambah Project
                     </button>
                 </div>
-
-                <div id="projectsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-                    <!-- Project Cards -->
+                <div id="projectsContainer" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
+                    <!-- Data Project Render via JS -->
                 </div>
             </div>
 
-            <!-- VIEW 3: OUTSTANDING PROJECT (Dinamis) -->
+            <!-- VIEW 3: OUTSTANDING PROJECT -->
             <div id="outstandingView" class="view-section">
-                <div class="mb-6"><h2 class="text-2xl font-bold text-gray-800">Daftar Outstanding Project</h2></div>
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+                <div class="mb-6"><h2 class="text-2xl font-black text-gray-800 tracking-tight">Daftar Outstanding Project</h2></div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
                     <table class="min-w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-slate-800 text-white text-sm uppercase tracking-wider">
-                                <th class="p-4 font-medium rounded-tl-lg">No</th>
-                                <th class="p-4 font-medium">Activity</th>
-                                <th class="p-4 font-medium">Mesin</th>
-                                <th class="p-4 font-medium">Status</th>
-                                <th class="p-4 font-medium rounded-tr-lg">PIC</th>
+                            <tr class="bg-slate-800 text-white text-xs uppercase tracking-wider font-bold">
+                                <th class="p-4 rounded-tl-xl w-16 text-center">No</th>
+                                <th class="p-4">Aktivitas (Tugas)</th>
+                                <th class="p-4">Project Mesin</th>
+                                <th class="p-4">Target Tgl</th>
+                                <th class="p-4 rounded-tr-xl">Status Saat Ini</th>
                             </tr>
                         </thead>
-                        <tbody id="outstandingTableBody" class="text-sm text-gray-700 divide-y divide-gray-200">
-                            <!-- Data akan di-generate otomatis via JS -->
+                        <tbody id="outstandingTableBody" class="text-sm text-gray-700 divide-y divide-gray-100">
                         </tbody>
                     </table>
                 </div>
             </div>
 
+            <!-- VIEW 4: TIMELINE PROJECT -->
             <div id="timelineView" class="view-section">
-                <div class="mb-6"><h2 class="text-2xl font-bold text-gray-800">Timeline Schedule Project</h2></div>
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                    <div onclick="toggleTimeline('timeline-1')" class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center cursor-pointer hover:bg-blue-50 transition-colors">
-                        <h3 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-chevron-down text-gray-400 mr-2 text-sm"></i> Project Schedule Overview</h3>
-                    </div>
-                    <div id="timeline-1" class="timeline-content px-4 bg-white open">
-                        <p class="text-sm text-gray-500 py-4">Timeline detail dapat diintegrasikan lebih lanjut.</p>
-                    </div>
+                <div class="mb-6"><h2 class="text-2xl font-black text-gray-800 tracking-tight">Timeline Schedule Project (Gantt)</h2></div>
+                <div id="timelineContainer" class="space-y-4">
+                    <!-- Gantt Charts Render via JS -->
                 </div>
             </div>
 
@@ -168,50 +233,136 @@
 
     <script>
         // ==========================================
-        // 1. DATA BASE SEMENTARA (ARRAY JAVASCRIPT)
+        // 1. DATABASE UTAMA (DENGAN TANGGAL)
         // ==========================================
         let projectsData = [
             {
                 id: 1,
                 name: "Depalletizer",
-                status: "Planning",
-                statusColor: "bg-blue-100 text-blue-700",
+                location: "Plant 1",
+                startDate: "2026-10-01",
+                endDate: "2026-10-31",
+                status: "", statusColor: "", // Akan dihitung otomatis
                 activities: [
-                    { name: "Hardware Specification Mapping", state: "done" },
-                    { name: "Cost Comparison BOM", state: "done" },
-                    { name: "Omron PLC Transition", state: "done" },
-                    { name: "wiring panel", state: "todo" }
+                    { id: 101, name: "Hardware Specification Mapping", startDate: "2026-10-01", endDate: "2026-10-05", state: "done" },
+                    { id: 102, name: "Cost Comparison BOM", startDate: "2026-10-06", endDate: "2026-10-10", state: "on_progress" },
+                    { id: 103, name: "Wiring Panel", startDate: "2026-10-11", endDate: "2026-10-25", state: "not_started" }
                 ]
             },
             {
                 id: 2,
                 name: "Transfer Conveyor",
-                status: "Review",
-                statusColor: "bg-purple-100 text-purple-700",
+                location: "Plant 2",
+                startDate: "2026-10-15",
+                endDate: "2026-11-15",
+                status: "", statusColor: "",
                 activities: [
-                    { name: "Mechanical Layouting", state: "done" },
-                    { name: "Assembly Sensor Transfer", state: "done" },
-                    { name: "Commissioning", state: "done" }
+                    { id: 201, name: "Mechanical Layouting", startDate: "2026-10-15", endDate: "2026-10-20", state: "done" },
+                    { id: 202, name: "Assembly Sensor Transfer", startDate: "2026-10-21", endDate: "2026-11-05", state: "done" }
                 ]
             },
             {
                 id: 3,
                 name: "Long Taper 7",
-                status: "Planning",
-                statusColor: "bg-blue-100 text-blue-700",
-                activities: [
-                    { name: "New Machine", state: "progress" }
-                ]
+                location: "Plant 5",
+                startDate: "2026-11-01",
+                endDate: "2026-11-30",
+                status: "", statusColor: "",
+                activities: []
             }
         ];
 
+        let targetProjectIdForActivity = null;
+        let chartInstance = null;
+
         // ==========================================
-        // 2. FUNGSI RENDER UTAMA (PROJECT & OUTSTANDING)
+        // 2. FUNGSI LOGIKA PERHITUNGAN OTOMATIS
+        // ==========================================
+        function calculateProjectStatuses() {
+            projectsData.forEach(proj => {
+                const total = proj.activities.length;
+                let doneCount = 0;
+                let progressCount = 0;
+
+                proj.activities.forEach(act => {
+                    if (act.state === 'done') doneCount++;
+                    if (act.state === 'on_progress') progressCount++;
+                });
+
+                if (total === 0 || (doneCount === 0 && progressCount === 0)) {
+                    // Jika kosong ATAU tidak ada yang done & on progress (berarti semua not_started)
+                    proj.status = "Not Started";
+                    proj.statusColor = "bg-red-100 text-red-700 border-red-200";
+                } else if (doneCount === total) {
+                    // Jika semua aktivitas done
+                    proj.status = "Finish";
+                    proj.statusColor = "bg-green-100 text-green-700 border-green-200";
+                } else {
+                    // Jika ada campuran
+                    proj.status = "On Progress";
+                    proj.statusColor = "bg-yellow-100 text-yellow-700 border-yellow-200";
+                }
+            });
+        }
+
+        // ==========================================
+        // 3. FUNGSI RENDER (DASHBOARD, PROJECT, OUTSTANDING, TIMELINE)
         // ==========================================
         function renderAll() {
+            calculateProjectStatuses(); // Hitung status dulu
+            
+            renderDashboard();
             renderProjects();
             renderOutstanding();
-            document.getElementById('countBerjalan').innerText = projectsData.length;
+            renderTimeline();
+        }
+
+        function renderDashboard() {
+            let pOnProgress = 0, pNotStarted = 0, pFinish = 0;
+            let aTotal = 0, aDone = 0, aProgress = 0, aNotStarted = 0;
+
+            projectsData.forEach(p => {
+                if (p.status === "On Progress") pOnProgress++;
+                if (p.status === "Not Started") pNotStarted++;
+                if (p.status === "Finish") pFinish++;
+
+                p.activities.forEach(a => {
+                    aTotal++;
+                    if (a.state === 'done') aDone++;
+                    if (a.state === 'on_progress') aProgress++;
+                    if (a.state === 'not_started') aNotStarted++;
+                });
+            });
+
+            // Update DOM Teks
+            document.getElementById('dashProjProgress').innerText = pOnProgress;
+            document.getElementById('dashProjNotStarted').innerText = pNotStarted;
+            document.getElementById('dashOutstanding').innerText = (aProgress + aNotStarted);
+            document.getElementById('dashDoneTodo').innerText = `${aDone} / ${aProgress + aNotStarted}`;
+
+            // Update Pie Chart Data (Sesuai Permintaan: Done, On Progress, Not Started)
+            if (chartInstance) {
+                chartInstance.data.datasets[0].data = [aDone, aProgress, aNotStarted];
+                chartInstance.update();
+            } else {
+                initChart([aDone, aProgress, aNotStarted]);
+            }
+        }
+
+        function initChart(dataArray) {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: { 
+                    labels: ['Done', 'On Progress', 'Not Started'], 
+                    datasets: [{ 
+                        data: dataArray, 
+                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444'], // Hijau, Kuning, Merah
+                        borderWidth: 3, borderColor: '#ffffff', hoverOffset: 6 
+                    }] 
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true, font: {family: 'Inter', weight: 'bold'} } } } }
+            });
         }
 
         function renderProjects() {
@@ -221,49 +372,53 @@
             projectsData.forEach(proj => {
                 let activitiesHTML = '';
                 proj.activities.forEach((act, index) => {
-                    let icon, textStyle, borderStyle;
+                    // Logic Indikator & Warna (Tanpa Coretan)
+                    let actBg, actBorder, actIcon, actText;
                     if (act.state === 'done') {
-                        // Jika sudah done, klik icon akan mengembalikan ke 'todo' (Undo)
-                        icon = `<i onclick="toggleActivityState(${proj.id}, ${index})" class="fa-solid fa-check-circle text-green-500 mt-1 cursor-pointer hover:text-orange-400" title="Klik untuk Undo (Batalkan Selesai)"></i>`;
-                        textStyle = 'line-through text-gray-400'; 
-                        borderStyle = '';
-                    } else if (act.state === 'progress') {
-                        icon = `<i onclick="toggleActivityState(${proj.id}, ${index})" class="fa-solid fa-spinner text-blue-500 mt-1 cursor-pointer hover:text-green-500 animate-spin" title="Klik untuk selesaikan"></i>`;
-                        textStyle = 'text-gray-700 font-medium'; 
-                        borderStyle = 'border-l-4 border-l-blue-500';
+                        actBg = 'bg-green-50'; actBorder = 'border-l-4 border-green-500'; actIcon = '<i class="fa-solid fa-circle-check text-green-500"></i>'; actText = 'text-green-800';
+                    } else if (act.state === 'on_progress') {
+                        actBg = 'bg-yellow-50'; actBorder = 'border-l-4 border-yellow-400'; actIcon = '<i class="fa-solid fa-spinner animate-spin text-yellow-500"></i>'; actText = 'text-yellow-800';
                     } else {
-                        // Status todo / belum mulai
-                        icon = `<i onclick="toggleActivityState(${proj.id}, ${index})" class="fa-regular fa-clock text-gray-300 mt-1 cursor-pointer hover:text-blue-500" title="Klik untuk mulai"></i>`;
-                        textStyle = 'text-gray-500'; 
-                        borderStyle = '';
+                        actBg = 'bg-red-50'; actBorder = 'border-l-4 border-red-500'; actIcon = '<i class="fa-solid fa-circle-xmark text-red-500"></i>'; actText = 'text-red-800';
                     }
                     
                     activitiesHTML += `
-                        <li class="bg-white border border-gray-200 ${borderStyle} p-3 rounded shadow-sm text-sm flex justify-between items-start">
-                            <span class="${textStyle}">${act.name}</span>
-                            ${icon}
-                        </li>
+                        <div class="${actBg} ${actBorder} border-y border-r border-gray-200 p-3 rounded-r-lg shadow-sm mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center transition-all">
+                            <div class="mb-2 sm:mb-0 pr-2">
+                                <div class="flex items-center space-x-2">
+                                    ${actIcon}
+                                    <span class="font-bold text-sm ${actText}">${act.name}</span>
+                                </div>
+                            </div>
+                            <div class="w-full sm:w-auto">
+                                <select onchange="updateActivityStatus(${proj.id}, ${act.id}, this.value)" class="w-full sm:w-auto text-xs font-bold p-1.5 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                                    <option value="not_started" ${act.state === 'not_started' ? 'selected' : ''}>Not Started</option>
+                                    <option value="on_progress" ${act.state === 'on_progress' ? 'selected' : ''}>On Progress</option>
+                                    <option value="done" ${act.state === 'done' ? 'selected' : ''}>Done</option>
+                                </select>
+                            </div>
+                        </div>
                     `;
                 });
 
                 const cardHTML = `
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
-                        <div class="bg-gray-50 p-4 border-b border-gray-200 rounded-t-lg flex justify-between items-center">
+                    <div class="bg-white rounded-xl shadow-md border border-gray-200 flex flex-col h-full overflow-hidden hover:shadow-lg transition-shadow">
+                        <div class="bg-slate-50 p-5 border-b border-gray-200 flex justify-between items-start">
                             <div>
-                                <h3 class="font-bold text-lg text-gray-800">${proj.name}</h3>
-                                <span class="text-xs font-semibold px-2 py-1 ${proj.statusColor} rounded-full mt-1 inline-block">${proj.status}</span>
+                                <h3 class="font-black text-xl text-slate-800 mb-1">${proj.name}</h3>
+                                <p class="text-xs font-medium text-slate-500 mb-2"><i class="fa-solid fa-location-dot mr-1"></i>${proj.location} &nbsp;|&nbsp; <i class="fa-regular fa-calendar mr-1"></i>${proj.startDate} s/d ${proj.endDate}</p>
+                                <span class="text-xs font-bold px-3 py-1 border ${proj.statusColor} rounded-full inline-block uppercase tracking-wide">${proj.status}</span>
                             </div>
-                            <div class="space-x-2">
-                                <button onclick="editProject(${proj.id})" class="text-gray-400 hover:text-blue-500 transition-colors" title="Edit Project"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button onclick="hapusProject(${proj.id})" class="text-gray-400 hover:text-red-500 transition-colors" title="Delete Project"><i class="fa-solid fa-trash"></i></button>
+                            <div class="space-x-1 flex-shrink-0">
+                                <button onclick="hapusProjectConfirm(${proj.id})" class="h-8 w-8 rounded bg-white border border-gray-200 text-gray-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-all shadow-sm" title="Delete Project"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
                         </div>
-                        <div class="p-4 flex-1">
-                            <ul class="space-y-3">${activitiesHTML}</ul>
+                        <div class="p-5 flex-1 bg-white">
+                            ${activitiesHTML.length > 0 ? activitiesHTML : '<p class="text-sm text-gray-400 italic text-center py-4">Belum ada aktivitas.</p>'}
                         </div>
-                        <div class="p-4 border-t border-gray-100">
-                            <button onclick="tambahActivity(${proj.id})" class="w-full text-sm text-gray-500 hover:text-blue-600 hover:bg-blue-50 py-2 rounded transition-colors text-left px-2">
-                                <i class="fa-solid fa-plus mr-1"></i> Tambah Activity...
+                        <div class="p-4 bg-gray-50 border-t border-gray-100">
+                            <button onclick="bukaModalTambahActivity(${proj.id})" class="w-full text-sm font-bold text-purple-600 hover:text-white bg-purple-50 hover:bg-purple-600 border border-purple-200 py-2.5 rounded-lg transition-all shadow-sm flex items-center justify-center">
+                                <i class="fa-solid fa-plus mr-2"></i> Tambah Activity
                             </button>
                         </div>
                     </div>
@@ -275,128 +430,218 @@
         function renderOutstanding() {
             const tableBody = document.getElementById('outstandingTableBody');
             tableBody.innerHTML = '';
-            
             let no = 1;
-            let totalOutstanding = 0;
 
             projectsData.forEach(proj => {
                 proj.activities.forEach(act => {
-                    // Masuk ke outstanding jika statusnya BUKAN 'done'
-                    if (act.state !== 'done') {
-                        totalOutstanding++;
-                        let badgeStatus = act.state === 'progress' 
-                            ? '<span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-bold">On Progress</span>'
-                            : '<span class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-bold">To Do</span>';
+                    if (act.state !== 'done') { // Not started atau On progress
+                        let badgeColor = act.state === 'on_progress' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' : 'bg-red-100 text-red-800 border border-red-200';
+                        let statusText = act.state === 'on_progress' ? 'On Progress' : 'Not Started';
 
                         tableBody.innerHTML += `
                             <tr class="hover:bg-blue-50 transition-colors">
-                                <td class="p-4 font-bold">${no++}</td>
-                                <td class="p-4 font-medium text-gray-900">${act.name}</td>
-                                <td class="p-4">${proj.name}</td>
-                                <td class="p-4">${badgeStatus}</td>
-                                <td class="p-4">Team Eng</td>
+                                <td class="p-4 font-bold text-center">${no++}</td>
+                                <td class="p-4 font-bold text-slate-800">${act.name}</td>
+                                <td class="p-4 font-medium text-slate-600"><span class="bg-gray-100 px-2 py-1 rounded text-xs border border-gray-200">${proj.name}</span></td>
+                                <td class="p-4 text-xs font-medium text-slate-500">${act.startDate} <br>s/d<br> ${act.endDate}</td>
+                                <td class="p-4"><span class="px-3 py-1.5 rounded-md text-xs font-bold ${badgeColor} uppercase tracking-wide shadow-sm">${statusText}</span></td>
                             </tr>
                         `;
                     }
                 });
             });
 
-            if (totalOutstanding === 0) {
-                tableBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400 italic">Tidak ada outstanding project saat ini. Bagus!</td></tr>`;
+            if (no === 1) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400 italic font-medium"><i class="fa-solid fa-check-double text-4xl mb-3 text-green-300 block"></i> Semua tugas sudah selesai! Tidak ada outstanding.</td></tr>`;
             }
-
-            document.getElementById('countOutstanding').innerText = totalOutstanding;
         }
 
-        // Jalankan render pertama kali
-        renderAll();
+        function renderTimeline() {
+            const container = document.getElementById('timelineContainer');
+            container.innerHTML = '';
+
+            projectsData.forEach(proj => {
+                let pStart = new Date(proj.startDate).getTime();
+                let pEnd = new Date(proj.endDate).getTime();
+                let pDuration = pEnd - pStart;
+                if(pDuration <= 0) pDuration = 86400000; // Minimal 1 hari jika input sama
+
+                let actsHtml = proj.activities.map(act => {
+                    let aStart = new Date(act.startDate).getTime();
+                    let aEnd = new Date(act.endDate).getTime();
+                    
+                    let leftPct = ((aStart - pStart) / pDuration) * 100;
+                    let widthPct = ((aEnd - aStart) / pDuration) * 100;
+                    
+                    // Clamping agar chart tidak bocor ke luar kotak
+                    if (leftPct < 0) leftPct = 0;
+                    if (leftPct > 100) leftPct = 100;
+                    if (leftPct + widthPct > 100) widthPct = 100 - leftPct;
+                    if (widthPct <= 0) widthPct = 2; 
+
+                    let barColor = act.state === 'done' ? 'bg-green-500' : (act.state === 'on_progress' ? 'bg-yellow-400' : 'bg-red-500');
+
+                    return `
+                        <div class="mb-4">
+                            <div class="flex justify-between text-xs font-bold text-gray-600 mb-1 px-1">
+                                <span>${act.name}</span>
+                                <span class="text-gray-400 font-medium">${act.startDate} to ${act.endDate}</span>
+                            </div>
+                            <div class="relative h-6 bg-slate-100 rounded-md w-full overflow-hidden border border-slate-200">
+                                <div class="absolute h-full rounded-md shadow-sm flex items-center px-2 text-[10px] text-white font-bold whitespace-nowrap overflow-hidden transition-all ${barColor}" 
+                                     style="left: ${leftPct}%; width: ${widthPct}%; min-width: 2rem;">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                container.innerHTML += `
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-4">
+                        <div onclick="toggleTimeline('tl-${proj.id}')" class="p-5 bg-slate-50 border-b border-gray-200 flex justify-between items-center cursor-pointer hover:bg-blue-50 transition-colors">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mr-4 shadow-inner">
+                                    <i class="fa-solid fa-gears text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-black text-slate-800 text-lg">${proj.name}</h3>
+                                    <p class="text-xs font-bold text-slate-500">Project Timeline: <span class="text-blue-600">${proj.startDate}</span> s/d <span class="text-blue-600">${proj.endDate}</span></p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-down text-gray-400 bg-white p-2 rounded-full border border-gray-200 shadow-sm"></i>
+                        </div>
+                        <div id="tl-${proj.id}" class="hidden p-6 bg-white gantt-scroll overflow-x-auto">
+                            ${actsHtml || '<p class="text-sm text-gray-400 italic text-center py-4">Belum ada aktivitas untuk dijadwalkan.</p>'}
+                        </div>
+                    </div>
+                `;
+            });
+        }
 
         // ==========================================
-        // 3. FUNGSI LOGIKA (TAMBAH, EDIT, HAPUS, TOGGLE)
+        // 4. LOGIKA CRUD & EVENT HANDLERS
         // ==========================================
         
-        // Simpan Project Baru
+        function updateActivityStatus(projId, actId, newStatus) {
+            const project = projectsData.find(p => p.id === projId);
+            const activity = project.activities.find(a => a.id === actId);
+            activity.state = newStatus;
+            renderAll();
+        }
+
+        function bukaModalTambahProject() {
+            // Set default date ke hari ini
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('newProjectStart').value = today;
+            document.getElementById('newProjectEnd').value = today;
+            toggleModal('addProjectModal');
+        }
+
         function simpanProjectBaru() {
-            const nameInput = document.getElementById('newProjectName').value;
-            const activityInput = document.getElementById('newProjectActivity').value;
+            const name = document.getElementById('newProjectName').value;
+            const loc = document.getElementById('newProjectLocation').value;
+            const start = document.getElementById('newProjectStart').value;
+            const end = document.getElementById('newProjectEnd').value;
             
-            if (nameInput.trim() === "") {
-                alert("Nama project tidak boleh kosong!"); return;
+            if (!name || !start || !end) {
+                tampilkanAlert("Nama Project, Tanggal Start, dan Tanggal End wajib diisi!");
+                return;
             }
 
-            const newProject = {
+            if(new Date(start) > new Date(end)) {
+                tampilkanAlert("Tanggal Start tidak boleh lebih besar dari Tanggal End!");
+                return;
+            }
+
+            projectsData.push({
                 id: Date.now(),
-                name: nameInput,
-                status: "Planning",
-                statusColor: "bg-blue-100 text-blue-700",
+                name: name,
+                location: loc || "-",
+                startDate: start,
+                endDate: end,
+                status: "Not Started", // Akan di-recalc
+                statusColor: "",
                 activities: []
-            };
+            });
 
-            if (activityInput.trim() !== "") {
-                newProject.activities.push({ name: activityInput, state: "todo" });
-            }
-
-            projectsData.push(newProject);
             renderAll();
             toggleModal('addProjectModal');
             
+            // Clear input
             document.getElementById('newProjectName').value = "";
             document.getElementById('newProjectLocation').value = "";
-            document.getElementById('newProjectActivity').value = "";
         }
 
-        // Hapus Project
-        function hapusProject(id) {
-            const konfirmasi = confirm("Apakah Anda yakin ingin menghapus project ini?");
-            if (konfirmasi) {
-                projectsData = projectsData.filter(proj => proj.id !== id);
-                renderAll();
-            }
+        function hapusProjectConfirm(id) {
+            targetProjectIdForActivity = id; // Pinjam variabel untuk ID Hapus
+            const modal = document.getElementById('customConfirmModal');
+            document.getElementById('confirmMessage').innerText = "Semua aktivitas di dalam project ini juga akan terhapus.";
+            modal.classList.remove('hidden');
         }
 
-        // Edit Nama Project
-        function editProject(id) {
-            const project = projectsData.find(proj => proj.id === id);
-            const namaBaru = prompt("Masukkan nama baru untuk project ini:", project.name);
-            
-            if (namaBaru !== null && namaBaru.trim() !== "") {
-                project.name = namaBaru;
-                renderAll();
-            }
+        function bukaModalTambahActivity(projId) {
+            targetProjectIdForActivity = projId;
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('newActStart').value = today;
+            document.getElementById('newActEnd').value = today;
+            document.getElementById('newActDesc').value = "";
+            toggleModal('addActivityModal');
         }
 
-        // Tambah Activity ke Project Tertentu
-        function tambahActivity(projectId) {
-            const namaActivity = prompt("Masukkan nama aktivitas baru:");
-            if (namaActivity !== null && namaActivity.trim() !== "") {
-                const project = projectsData.find(proj => proj.id === projectId);
-                project.activities.push({ name: namaActivity, state: "todo" });
-                renderAll();
-            }
-        }
+        function simpanAktivitasBaru() {
+            const desc = document.getElementById('newActDesc').value;
+            const start = document.getElementById('newActStart').value;
+            const end = document.getElementById('newActEnd').value;
 
-        // Toggle Status Activity dengan Sistem Siklus (Todo -> Progress -> Done -> Todo / Undo)
-        function toggleActivityState(projectId, activityIndex) {
-            const project = projectsData.find(proj => proj.id === projectId);
-            let currentState = project.activities[activityIndex].state;
-
-            if (currentState === 'todo') {
-                project.activities[activityIndex].state = 'progress';
-            } else if (currentState === 'progress') {
-                project.activities[activityIndex].state = 'done';
-            } else {
-                // Sifat Undo: dari done kembali ke todo/progress
-                project.activities[activityIndex].state = 'todo';
+            if (!desc || !start || !end) {
+                tampilkanAlert("Deskripsi dan Tanggal wajib diisi!");
+                return;
             }
+
+            if(new Date(start) > new Date(end)) {
+                tampilkanAlert("Tanggal Start tidak boleh lebih besar dari Tanggal End!");
+                return;
+            }
+
+            const project = projectsData.find(p => p.id === targetProjectIdForActivity);
+            project.activities.push({
+                id: Date.now(),
+                name: desc,
+                startDate: start,
+                endDate: end,
+                state: "not_started"
+            });
+
             renderAll();
+            toggleModal('addActivityModal');
         }
 
         // ==========================================
-        // 4. LOGIKA UI LAINNYA
+        // 5. UTILITAS MODAL CUSTOM & UI NAVIGATION
         // ==========================================
+        function tampilkanAlert(pesan) {
+            document.getElementById('alertMessage').innerText = pesan;
+            document.getElementById('customAlertModal').classList.remove('hidden');
+        }
+        function closeAlert() { document.getElementById('customAlertModal').classList.add('hidden'); }
+
+        function closeConfirm(isConfirmed) {
+            document.getElementById('customConfirmModal').classList.add('hidden');
+            if(isConfirmed && targetProjectIdForActivity !== null) {
+                projectsData = projectsData.filter(proj => proj.id !== targetProjectIdForActivity);
+                targetProjectIdForActivity = null;
+                renderAll();
+            }
+        }
+
         function toggleModal(modalID){
             const modal = document.getElementById(modalID);
             modal.classList.toggle('hidden');
+        }
+
+        function toggleTimeline(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('hidden');
         }
 
         const sidebar = document.getElementById('sidebar');
@@ -411,21 +656,26 @@
 
         function switchView(viewId, titleText) {
             document.querySelectorAll('.view-section').forEach(section => section.classList.remove('active'));
-            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('bg-slate-700'));
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('bg-slate-700');
+                // mereset warna icon jika tidak aktif
+                const icon = item.querySelector('i');
+                icon.classList.remove('text-white');
+            });
+
             document.getElementById(viewId).classList.add('active');
             document.getElementById('headerTitle').innerText = titleText;
-            document.getElementById('menu-' + viewId).classList.add('bg-slate-700');
+            
+            const activeMenu = document.getElementById('menu-' + viewId);
+            activeMenu.classList.add('bg-slate-700');
+            activeMenu.querySelector('i').classList.add('text-white');
+
             if (window.innerWidth < 768) { sidebar.classList.add('-translate-x-full'); sidebar.classList.remove('translate-x-0'); }
         }
 
-        function toggleTimeline(id) { document.getElementById(id).classList.toggle('open'); }
+        // Jalankan saat load
+        renderAll();
 
-        const ctx = document.getElementById('progressChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: { labels: ['Done', 'On Progress', 'To Do', 'Outstanding'], datasets: [{ data: [40, 25, 20, 15], backgroundColor: ['#10B981', '#3B82F6', '#8B5CF6', '#EF4444'], borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right', labels: { padding: 20, usePointStyle: true } } } }
-        });
     </script>
 </body>
 </html>
